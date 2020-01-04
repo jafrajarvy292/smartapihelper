@@ -14,7 +14,7 @@ namespace jafrajarvy292\SmartAPIHelper\HTTPHandler;
 class HTTPHandler
 {
     /** @var string The SmartAPI Helper version */
-    private const SMARTAPI_HELPER_VERSION = '1.0.0';
+    private $smartapi_helper_version = '';
     /** @var string User's login name */
     private $user_login;
     /** @var string User's password */
@@ -52,6 +52,8 @@ class HTTPHandler
     {
         //Initialize cURL resource
         $this->ch = curl_init();
+        //Get the SmartAPI library version
+        $this->smartapi_helper_version = file_get_contents(__DIR__ . '/../VERSION.config');
     }
 
     /**
@@ -209,7 +211,7 @@ class HTTPHandler
         //Set user agent
         $curl_agent = 'cURL/' . curl_version()['version'];
         $php_agent = 'PHP/' . PHP_VERSION;
-        $smartapi_helper_agent = 'SmartAPIHelper/' . self::SMARTAPI_HELPER_VERSION;
+        $smartapi_helper_agent = 'SmartAPIHelper/' . $this->smartapi_helper_version;
         $full_agent = $smartapi_helper_agent . ' ' . $curl_agent . ' ' . $php_agent;
         curl_setopt($this->ch, CURLOPT_USERAGENT, $full_agent);
 
