@@ -1,7 +1,7 @@
 {
     "name": "jafrajarvy292/smartapihelper",
     "description": "Helper library for MeridianLink's SmartAPI interface",
-    "keywords": ["meridianlink, mcl, mortgagecreditlink, smartapi, credit report, credit reports, mismo"],
+    "keywords": ["meridianlink", "mcl", "mortgagecreditlink", "smartapi", "credit report", "credit reports", "mismo"],
     "homepage": "https://github.com/jafrajarvy292",
     "license": "MIT",
     "authors": [
@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": ">=7.1.*",
+        "php": ">=7.1.0",
 		"ext-curl": "*",
 		"ext-dom": "*",
 		"ext-xml": "*",
