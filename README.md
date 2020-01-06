@@ -14,7 +14,7 @@ The SmartAPI Integration Guide, which is included in the integration kit, can be
 # Installation Instructions
 ## With Composer
 To install using composer:
->`composer require jafrajarvy292/smartapihelper`
+>composer require jafrajarvy292/smartapihelper
 
 If composer's autoload file is already included in your project, then this library will automatically be loaded.
 ## Manual Installation
