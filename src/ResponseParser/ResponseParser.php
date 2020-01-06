@@ -57,6 +57,12 @@ abstract class ResponseParser
         'COMPLETED' => 'COMPLETED',
         'ERROR' => 'ERROR'
     ];
+    /** @var \DOMDocument This will hold the XML document we received from the server */
+    protected $base;
+    /** @var \DOMElement This will hold the root element */
+    protected $root;
+    /** @var \DOMXPath The xpath that will help us jump around the XML doc as we parse it */
+    protected $xpath;
     /** @var string This variable holds the status we pulled from the XML response to provide to the user */
     private $response_status = '';
     /** @var string If a message or description accompanies the response, it will be stored here. For error
@@ -64,12 +70,6 @@ abstract class ResponseParser
     private $response_description = '';
     /** @var string Holds the VendorOrderIdentifer provided in the response */
     private $vendor_order_id = '';
-    /** @var \DOMDocument This will hold the XML document we received from the server */
-    protected $base;
-    /** @var \DOMElement This will hold the root element */
-    protected $root;
-    /** @var \DOMXPath The xpath that will help us jump around the XML doc as we parse it */
-    protected $xpath;
 
     /**
      * Will load all our XML-related variables, declare necessary namespaces, and grab some commmonly-used
@@ -122,8 +122,151 @@ abstract class ResponseParser
     }
 
     /**
-     * This extracts the status and status description from the XML response.
-     * It is intended to be ran from within the constructor.
+     * Returns the status indicated in the response XML file
+     *
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->response_status;
+    }
+
+    /**
+     * Returns the status description indicated in the response XML file
+     *
+     * @return string
+     */
+    public function getStatusDescription(): string
+    {
+        return $this->response_description;
+    }
+
+    /**
+     * Returns the VendorOrderIdentifier found in the response file
+     *
+     * @return string
+     */
+    public function getVendorOrderID(): string
+    {
+        return $this->vendor_order_id;
+    }
+
+    /**
+     * Returns an array containing the objects you could use if you wanted to parse or traverse the
+     * response XML yourself. This would be used in cases where you want to extract information
+     * that the SmartAPI Helper library doesn't specifically provide a method for retrieving. The below
+     * outlines the associative array that is returned:
+     *
+     * 'DOMDocument' => \DOMDocument (This is a clone of the XML document received from the server)
+     * 'DOMXPath' => \DOMXPath (This is the xpath object associated with the DOMDocument clone. This would be
+     * used to navigate through the document.)
+     * 'Namespaces' => [] (This is an associative array of all the namespaces that have been registered
+     * with the XML document and xpath object. The keys are the namespace prefix, the values are the
+     * namespace URIs)
+     *
+     * @return array
+     */
+    public function getDOMObjects(): array
+    {
+        $return = [];
+        /* Clone the DOMDocument. This allows the user to manipulate the data without editing the original
+        object, which our class makes use of */
+        $new_base = clone $this->base;
+        //Since we've closed the DOMDocuemnt, we need to create a new xpath object associated with this one
+        $new_xpath = new \DOMXPath($new_base);
+        $new_namespaces = [];
+
+        /* Register all namespaces to the xpath object. Namespace registration doesn't need to be done with
+        the DOMDocument because the original one we've cloned already had that done */
+        $new_xpath->registerNamespace('P1', $this::P1);
+        $new_xpath->registerNamespace('P2', $this::P2);
+        $new_xpath->registerNamespace('P3', $this::P3);
+        $new_xpath->registerNamespace('P4', $this::P4);
+        $new_xpath->registerNamespace('P5', $this::P5);
+
+        /* Put all the namespaces registered into an array. It would be better to loop through some sort of
+        array for this, but there is currently no way to see all namespaces registered to an xpath object.
+        The drawback to manually including this information is if the SmartAPI response starts returning
+        a new namespace in the future, we'll have to update this method to include it */
+        $new_namespaces = [
+            'P1' => $this::P1,
+            'P2' => $this::P2,
+            'P3' => $this::P3,
+            'P4' => $this::P4,
+            'P5' => $this::P5,
+        ];
+
+        //Add our data to the array we'll be returning
+        $return['DOMDocument'] = $new_base;
+        $return['DOMXpath'] = $new_xpath;
+        $return['Namespaces'] = $new_namespaces;
+
+        return $return;
+    }
+
+    /**
+     * Returns the unique ID the SmartAPI interface generated for this specific transaction. If
+     * troubleshooting with the service provider, providing this ID will allow the support person to
+     * quickly locate your request and the server's response for reviewing.
+     *
+     * @return string
+     */
+    public function getTransactionID(): string
+    {
+        $transaction_id = '';
+        $node = $this->xpath->evaluate(
+            '/P1:MESSAGE/P1:DEAL_SETS/P1:DEAL_SET/P1:DEALS/P1:DEAL/P1:PARTIES/P1:PARTY/P1:ROLES/P1:ROLE/' .
+            'P1:RESPONDING_PARTY/P1:RespondingPartyTransactionIdentifier'
+        )->item(0);
+        if ($node !== null) {
+            $transaction_id = $node->textContent;
+        }
+        return $transaction_id;
+    }
+
+    /**
+     * Returns the HTML version of the completed report as a literal string. If no HTML report exists,
+     * returns an empty
+     *
+     * @return string
+     */
+    public function getHTMLDocString(): string
+    {
+        $document = '';
+        $node = $this->xpath->evaluate(
+            '/P1:MESSAGE/P1:DOCUMENT_SETS/P1:DOCUMENT_SET/P1:DOCUMENTS/' .
+            'P1:DOCUMENT/P1:VIEWS/P1:VIEW/P1:VIEW_FILES/P1:VIEW_FILE/' .
+            'P1:FOREIGN_OBJECT[P1:MIMETypeIdentifier[text()="text/html"]]/P1:EmbeddedContentXML'
+        )->item(0);
+        if ($node !== null) {
+            $document = $node->textContent;
+        }
+        return $document;
+    }
+
+    /**
+     * Return the PDF version of the completed report as a base64 encoded string. If no PDF report
+     * exits, returns an empty string
+     *
+     * @return string
+     */
+    public function getPDFDocString(): string
+    {
+        $document = '';
+        $node = $this->xpath->evaluate(
+            '/P1:MESSAGE/P1:DOCUMENT_SETS/P1:DOCUMENT_SET/P1:DOCUMENTS/' .
+            'P1:DOCUMENT/P1:VIEWS/P1:VIEW/P1:VIEW_FILES/P1:VIEW_FILE/' .
+            'P1:FOREIGN_OBJECT[P1:MIMETypeIdentifier[text()="application/pdf"]]/P1:EmbeddedContentXML'
+        )->item(0);
+        if ($node !== null) {
+            $document = $node->textContent;
+        }
+        return $document;
+    }
+
+    /**
+     * This extracts the status and status description from the XML response. Intended to be ran by the
+     * child class when the XML doc is initially loaded to the object
      *
      * @return void
      */
@@ -192,8 +335,8 @@ abstract class ResponseParser
     }
 
     /**
-     * This will extract the VendorOrderIdentifier from the response XML, if present. It is intended to be
-     * ran from within the constructor.
+     * This will extract the VendorOrderIdentifier from the response XML, if present. Intended to be ran by
+     * the child class when the XML is initially loaded to the object
      *
      * @return void
      */
@@ -207,107 +350,5 @@ abstract class ResponseParser
         if ($id !== null) {
             $this->vendor_order_id = $id->textContent;
         }
-    }
-
-    /**
-     * Returns the status indicated in the response XML file
-     *
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->response_status;
-    }
-
-    /**
-     * Returns the status description indicated in the response XML file
-     *
-     * @return string
-     */
-    public function getStatusDescription(): string
-    {
-        return $this->response_description;
-    }
-
-    /**
-     * Returns the VendorOrderIdentifier found in the response file
-     *
-     * @return string
-     */
-    public function getVendorOrderID(): string
-    {
-        return $this->vendor_order_id;
-    }
-
-    /**
-     * Returns a copy of the DOMDocument created from the server's XML document. This can then be used to
-     * extract whatever information you need that the SmartAPI Helper library doesn't specifically provide
-     * a method for retrieving
-     *
-     * @return \DOMDocument
-     */
-    public function getDOMDocument(): \DOMDocument
-    {
-        return clone $this->base;
-    }
-
-    /**
-     * Returns the unique ID the SmartAPI interface generated for this specific transaction. If
-     * troubleshooting with the service provider, providing this ID will allow the support person to
-     * quickly locate your request and the server's response for reviewing.
-     *
-     * @return string
-     */
-    public function getTransactionID(): string
-    {
-        $transaction_id = '';
-        $node = $this->xpath->evaluate(
-            '/P1:MESSAGE/P1:DEAL_SETS/P1:DEAL_SET/P1:DEALS/P1:DEAL/P1:PARTIES/P1:PARTY/P1:ROLES/P1:ROLE/' .
-            'P1:RESPONDING_PARTY/P1:RespondingPartyTransactionIdentifier'
-        )->item(0);
-        if ($node !== null) {
-            $transaction_id = $node->textContent;
-        }
-        return $transaction_id;
-    }
-
-    /**
-     * Returns the HTML version of the completed report as a literal string. If no HTML report exists,
-     * returns an empty
-     *
-     * @return string
-     */
-    public function getHTMLDocString(): string
-    {
-        $document = '';
-        $node = $this->xpath->evaluate(
-            '/P1:MESSAGE/P1:DOCUMENT_SETS/P1:DOCUMENT_SET/P1:DOCUMENTS/' .
-            'P1:DOCUMENT/P1:VIEWS/P1:VIEW/P1:VIEW_FILES/P1:VIEW_FILE/' .
-            'P1:FOREIGN_OBJECT[P1:MIMETypeIdentifier[text()="text/html"]]/P1:EmbeddedContentXML'
-        )->item(0);
-        if ($node !== null) {
-            $document = $node->textContent;
-        }
-        return $document;
-    }
-
-    /**
-     * Return the PDF version of the completed report as a base64 encoded string. If no PDF report
-     * exits, returns an empty string
-     *
-     * @return string
-     */
-    public function getPDFDocString(): string
-    {
-        $document = '';
-        $node = $this->xpath->evaluate(
-            '/P1:MESSAGE/P1:DOCUMENT_SETS/P1:DOCUMENT_SET/P1:DOCUMENTS/' .
-            'P1:DOCUMENT/P1:VIEWS/P1:VIEW/P1:VIEW_FILES/P1:VIEW_FILE/' .
-            'P1:FOREIGN_OBJECT[P1:MIMETypeIdentifier[text()="application/pdf"]]/P1:EmbeddedContentXML'
-        )->item(0);
-        if ($node !== null) {
-            $document = $node->textContent;
-        }
-        return $document;
     }
 }

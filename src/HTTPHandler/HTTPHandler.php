@@ -31,6 +31,8 @@ class HTTPHandler
     private $ch;
     /** @var string Holds the response body from the latest cURL execution */
     private $ch_response = '';
+    /** @var string Holds the path to the certificate bundle file if overriding the default */
+    private $ch_cert_path = '';
     /** @var int The time, in seconds, until the connection to the server is timed out. This encompasses
      * the time we allow from the sending of the request to when the server is done streaming us its response.
      * This method applies the timeout to both the cURL resource and PHP's set_time_limit().
@@ -60,6 +62,8 @@ class HTTPHandler
      * Set user's login name
      *
      * @param string $login The login name
+     * @param bool $colon_exception Colons are not allowed in the user login name with Basic Auth scheme. Set
+     * this flag to true to ignore this. Note that your login attempt will probably fail, though.
      * @return void
      */
     public function setUserLogin(string $login, bool $colon_exception = false): void
@@ -136,6 +140,24 @@ class HTTPHandler
     }
 
     /**
+     * Set the path to the certificate bundle to use to validate server's SSL cert. The cURL extension
+     * will typically have this already defaulted to a certain file or folder, this allows you to override it.
+     *
+     * @param string $path Path to the file
+     * @return void
+     * @example location description
+     */
+    public function setCURLCertFile(string $path): void
+    {
+        if (!is_file($path)) {
+            throw new \Exception('File "' . $path . '" does not exist.');
+        } else {
+            $this->ch_cert_path = $path;
+            curl_setopt($this->ch, CURLOPT_CAINFO, $path);
+        }
+    }
+
+    /**
      * Stores the XML request string to the corresponding object property
      *
      * @param string $document The full XML request string to be sent to SmartAPI service
@@ -155,81 +177,6 @@ class HTTPHandler
     public function setHTTPTimeout(int $duration): void
     {
         $this->http_timeout = $duration;
-    }
-
-    /**
-     * This prepares the cURL resource for execution. It's the final step before submitting the request.
-     *
-     * @return void
-     */
-    public function curlPrep(): void
-    {
-        //Check for user login
-        if ($this->user_login === null || $this->user_login === '') {
-            throw new \Exception('User login name is required.');
-        }
-        //Check for user password
-        if ($this->user_password === null || $this->user_password === '') {
-            throw new \Exception('User password is required.');
-        }
-        //Check for HTTP endpoint
-        if ($this->http_endpoint === null || $this->http_endpoint == '') {
-            throw new \Exception('HTTP endpoint is required. If testing, use ' .
-                '"https://demo.mortgagecreditlink.com/inetapi/request_products.aspx"');
-        }
-        //Check for MCL-Interface header
-        if ($this->mcl_interface === null || $this->mcl_interface === '') {
-            throw new \Exception('MCL-Interface is required. If testing, use "SmartAPITestingIdentifier"');
-        }
-        //Check for XML payload
-        if ($this->xml_string === null || $this->xml_string === '') {
-            throw new \Exception('XML request string is required.');
-        }
-
-        //Check that cURL library is installed, since that is what we'll be using
-        if (extension_loaded('curl') === false) {
-            throw new \Exception('cURL library is required, but does not appear to be installed.');
-        }
-
-        /* Set PHP's timeout to match the one set for cURL. PHP's default timeout is 30 seconds, which
-        will cause early timeouts if our cURL value is set higher and we fail to increase the PHP one */
-        set_time_limit($this->http_timeout);
-        /* Ignore user connection abort; this ensures the application will wait for and process the server's
-        response, even if the user disconnects */
-        ignore_user_abort(true);
-
-        //Set cURL timeout
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->http_timeout);
-        //Set response to be stored as a string
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-        //Set POST method
-        curl_setopt($this->ch, CURLOPT_POST, true);
-        //Enable redirect following
-        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
-        //Enable cURL failure if HTTP status code indicates error
-        curl_setopt($this->ch, CURLOPT_FAILONERROR, true);
-        //Set user agent
-        $curl_agent = 'cURL/' . curl_version()['version'];
-        $php_agent = 'PHP/' . PHP_VERSION;
-        $smartapi_helper_agent = 'SmartAPIHelper/' . $this->smartapi_helper_version;
-        $full_agent = $smartapi_helper_agent . ' ' . $curl_agent . ' ' . $php_agent;
-        curl_setopt($this->ch, CURLOPT_USERAGENT, $full_agent);
-
-        //Set relevant HTTP headers for SmartAPI
-        $headers = [];
-        $headers[] = 'Content-Type: application/xml';
-        $headers[] = 'MCL-Interface: ' . $this->mcl_interface;
-        $headers[] = 'Authorization: Basic ' . base64_encode($this->user_login . ':' . $this->user_password);
-        if ($this->mcl_surrogated_login !== null && $this->mcl_surrogated_login !== '') {
-            $headers[] = 'MCL-SurrogatedLogin: ' . $this->mcl_surrogated_login;
-        }
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
-        
-        //Set URL
-        curl_setopt($this->ch, CURLOPT_URL, $this->http_endpoint);
-        
-        //Set payload, which is the XML request string
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->xml_string);
     }
 
     /**
@@ -433,7 +380,7 @@ class HTTPHandler
      * will be placed in the directory provided in the argument.
      * The files are not stripped of sensitive data; they should be deleted when no longer needed.
      *
-     * @param string $path The folder where you want the log files output.
+     * @param string $output_folder The folder where you want the log files output.
      * @return void
      * @example $object->enableLogging('./TempFolder/');
      */
@@ -457,5 +404,81 @@ class HTTPHandler
 
         //If we get this far, then enable the logging flag.
         $this->logging_enabled = true;
+    }
+
+    /**
+     * Helper function that prepares the cURL resource for execution. It's the final step before
+     * submitting the request.
+     *
+     * @return void
+     */
+    private function curlPrep(): void
+    {
+        //Check for user login
+        if ($this->user_login === null || $this->user_login === '') {
+            throw new \Exception('User login name is required.');
+        }
+        //Check for user password
+        if ($this->user_password === null || $this->user_password === '') {
+            throw new \Exception('User password is required.');
+        }
+        //Check for HTTP endpoint
+        if ($this->http_endpoint === null || $this->http_endpoint == '') {
+            throw new \Exception('HTTP endpoint is required. If testing, use ' .
+                '"https://demo.mortgagecreditlink.com/inetapi/request_products.aspx"');
+        }
+        //Check for MCL-Interface header
+        if ($this->mcl_interface === null || $this->mcl_interface === '') {
+            throw new \Exception('MCL-Interface is required. If testing, use "SmartAPITestingIdentifier"');
+        }
+        //Check for XML payload
+        if ($this->xml_string === null || $this->xml_string === '') {
+            throw new \Exception('XML request string is required.');
+        }
+
+        //Check that cURL library is installed, since that is what we'll be using
+        if (extension_loaded('curl') === false) {
+            throw new \Exception('cURL library is required, but does not appear to be installed.');
+        }
+
+        /* Set PHP's timeout to match the one set for cURL. PHP's default timeout is 30 seconds, which
+        will cause early timeouts if our cURL value is set higher and we fail to increase the PHP one */
+        set_time_limit($this->http_timeout);
+        /* Ignore user connection abort; this ensures the application will wait for and process the server's
+        response, even if the user disconnects */
+        ignore_user_abort(true);
+
+        //Set cURL timeout
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->http_timeout);
+        //Set response to be stored as a string
+        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        //Set POST method
+        curl_setopt($this->ch, CURLOPT_POST, true);
+        //Enable redirect following
+        curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
+        //Enable cURL failure if HTTP status code indicates error
+        curl_setopt($this->ch, CURLOPT_FAILONERROR, true);
+        //Set user agent
+        $curl_agent = 'cURL/' . curl_version()['version'];
+        $php_agent = 'PHP/' . PHP_VERSION;
+        $smartapi_helper_agent = 'SmartAPIHelper/' . $this->smartapi_helper_version;
+        $full_agent = $smartapi_helper_agent . ' ' . $curl_agent . ' ' . $php_agent;
+        curl_setopt($this->ch, CURLOPT_USERAGENT, $full_agent);
+
+        //Set relevant HTTP headers for SmartAPI
+        $headers = [];
+        $headers[] = 'Content-Type: application/xml';
+        $headers[] = 'MCL-Interface: ' . $this->mcl_interface;
+        $headers[] = 'Authorization: Basic ' . base64_encode($this->user_login . ':' . $this->user_password);
+        if ($this->mcl_surrogated_login !== null && $this->mcl_surrogated_login !== '') {
+            $headers[] = 'MCL-SurrogatedLogin: ' . $this->mcl_surrogated_login;
+        }
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+        
+        //Set URL
+        curl_setopt($this->ch, CURLOPT_URL, $this->http_endpoint);
+        
+        //Set payload, which is the XML request string
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->xml_string);
     }
 }

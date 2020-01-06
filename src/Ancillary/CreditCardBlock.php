@@ -26,39 +26,6 @@ class CreditCardBlock
     private $card_cvv = '';
 
     /**
-     * Validates the card number against Luhn algorithm, helpful in flagging typos. This does not verify
-     * that the card was actually issued by a bank, has sufficient funds, etc.
-     *
-     * @param string $number Full card number, without hyphen or spaces (e.g. separators)
-     * @return boolean Will return true if card passes validity check, else false
-     */
-    public static function validateCardNumber(string $number): bool
-    {
-        //Convert input string to array, one array slot for each digit
-        $array = str_split($number);
-        //Cast each array entry from string to int
-        for ($i = 0; $i < count($array); $i++) {
-            $array[$i] = (int)$array[$i];
-        }
-        //Apply the "doubling" portion of the Luhn algorithm to applicable items
-        for ($i = count($array) - 2; $i >= 0; $i -= 2) {
-            $doubled = (int)$number[$i] * 2;
-            if ($doubled > 9) {
-                $split = str_split($doubled);
-                $doubled = array_sum($split);
-            }
-            $array[$i] = $doubled;
-        }
-        //Sum the resulting array
-        $result = array_sum($array);
-        if ($result % 10 === 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Set the cardholder's name
      *
      * @param PersonNameBlock $name
@@ -294,5 +261,38 @@ class CreditCardBlock
             ));
         }
         return $parent;
+    }
+
+    /**
+     * Validates the card number against Luhn algorithm, helpful in flagging typos. This does not verify
+     * that the card was actually issued by a bank, has sufficient funds, etc.
+     *
+     * @param string $number Full card number, without hyphen or spaces (e.g. separators)
+     * @return boolean Will return true if card passes validity check, else false
+     */
+    public static function validateCardNumber(string $number): bool
+    {
+        //Convert input string to array, one array slot for each digit
+        $array = str_split($number);
+        //Cast each array entry from string to int
+        for ($i = 0; $i < count($array); $i++) {
+            $array[$i] = (int)$array[$i];
+        }
+        //Apply the "doubling" portion of the Luhn algorithm to applicable items
+        for ($i = count($array) - 2; $i >= 0; $i -= 2) {
+            $doubled = (int)$number[$i] * 2;
+            if ($doubled > 9) {
+                $split = str_split($doubled);
+                $doubled = array_sum($split);
+            }
+            $array[$i] = $doubled;
+        }
+        //Sum the resulting array
+        $result = array_sum($array);
+        if ($result % 10 === 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

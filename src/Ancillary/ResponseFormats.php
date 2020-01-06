@@ -102,7 +102,7 @@ class ResponseFormats
     }
 
     /**
-     * Returns an associatve array of all formats, regardless of their flag
+     * Returns an associative array of all formats, regardless of their flag
      *
      * @return array
      */
@@ -126,7 +126,6 @@ class ResponseFormats
         }
         return $count;
     }
-
 
     /**
      * Generates the XML container used to indicate the preferred response formats

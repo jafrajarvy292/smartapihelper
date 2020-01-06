@@ -13,6 +13,17 @@ namespace jafrajarvy292\SmartAPIHelper\ResponseParser;
  */
 class ConsumerCreditResponseParser extends ResponseParser
 {
+    /** @var array Holds all the possible statuses that can be returned by the server for this product type.
+     * See parent class for all possible statuses with SmartAPI and details on each enumeration
+     */
+    public const STATUS = [
+        'REQUEST_ERROR' => 'REQUEST_ERROR',
+        'SERVICE_ERROR' => 'SERVICE_ERROR',
+        'NEW' => 'NEW',
+        'PROCESSING' => 'PROCESSING',
+        'COMPLETED' => 'COMPLETED',
+        'ERROR' => 'ERROR'
+    ];
     /** @var bool Holds flag that tells us if the response file contains a primary borrower */
     private $borr_present = false;
     /** @var string The label associated with the borrower, parsed from the XML response */
@@ -31,18 +42,6 @@ class ConsumerCreditResponseParser extends ResponseParser
     private $borr_credit_file_labels = [];
     /** @var array Holds an array of the labels identifying each of the coborrower's CREDIT_FILE nodes */
     private $coborr_credit_file_labels = [];
-
-    /** @var array Holds all the possible statuses that can be returned by the server for this product type.
-     * See parent class for all possible statuses with SmartAPI and details on each enumeration
-     */
-    public const STATUS = [
-        'REQUEST_ERROR' => 'REQUEST_ERROR',
-        'SERVICE_ERROR' => 'SERVICE_ERROR',
-        'NEW' => 'NEW',
-        'PROCESSING' => 'PROCESSING',
-        'COMPLETED' => 'COMPLETED',
-        'ERROR' => 'ERROR'
-    ];
 
     /**
      * Load the XML response string to our parser. In doing so, the same parent method is called, which
@@ -93,14 +92,6 @@ class ConsumerCreditResponseParser extends ResponseParser
         //If coborrower is present, identify all CREDIT_FILE containers associated with them and save it.
         if ($this->coborr_present === true) {
             $this->loadCreditFileLabels('c');
-        }
-    }
-
-    private function checkPersonID(string $id): void
-    {
-        if ($id !== $this->borr_id && $id !== $this->coborr_id) {
-            throw new \Exception('Person ID is invalid, must be any of the following ' .
-                $this->borr_id . ',' . $this->coborr_id);
         }
     }
 
@@ -514,6 +505,62 @@ class ConsumerCreditResponseParser extends ResponseParser
     }
 
     /**
+     * This method converts rating codes to their text equivalent. The rating code is also referred
+     * to as MOP (Manner of Payment) and payment rating. The description of each rating text is below
+     *
+     * X or -: The creditor did not report any data for that month. Note that the response
+     * XML may sometimes offer it's own corresponding rating text. In such cases, you may see a value
+     * of "TooNew" for this code. Practically speaking, they can both be treated the same: nothing available.
+     * C: The account is current and paid on time.
+     * 1: The account is 30-59 days late on payment.
+     * 2: The account is 60-89 days late on payment.
+     * 3: The account is 90-119 days late on payment.
+     * 4 or 5 or 6: The account is 120 or more days late on payment.
+     * 7: The account has been included in a bankruptcy filing.
+     * 8: The secured debt is overdue and the creditor has moved to repossess collateral to settle.
+     * 9: The unsecured debt is overdue and the creditor has written it off. This may--or may already have
+     * been--sold to a collection agency.
+     *
+     * @param string $code The rating code. Should be a single character.
+     * @param boolean $suppress_invalid False by default, but if set to true, submitting an invalid rating
+     * code will return an empty string instead of throwing an exception.
+     * @return string
+     */
+    public static function getRatingText(string $code, bool $suppress_invalid = false): string
+    {
+        $code = strtoupper(trim($code));
+        $rating_table = [
+            'X' => 'NoDataAvailable',
+            '-' => 'NoDataAvailable',
+            'C' => 'AsAgreed',
+            '1' => 'Late30Days',
+            '2' => 'Late60Days',
+            '3' => 'Late90Days',
+            '4' => 'Late120Days',
+            '5' => 'Late120Days',
+            '6' => 'Late120Days',
+            '7' => 'BankruptcyOrWageEarnerPlan',
+            '8' => 'ForeclosureOrRepossession',
+            '9' => 'CollectionOrChargeOff',
+        ];
+
+        //Loop through rating table to find a match and return it
+        foreach ($rating_table as $key => $value) {
+            if ($code === (string)$key) {
+                return $value;
+            }
+        }
+
+        /* If code makes it this far, then rating code provided isn't in our mapping table. Return exception
+        if the suppress invalid flag isn't set to true */
+        if ($suppress_invalid === true) {
+            return '';
+        } else {
+            throw new \Exception('Rating Code provided not a valid enumeration.');
+        }
+    }
+
+    /**
      * This helper function converts a CREDIT_LIABILITY DOMElement to an associative array. Depending on the
      * type of liability, some of the data points will return an empty string to indicate nothing was provided
      * for it. This can often occur if the datapoint is not applicable for the liability. For example, an auto
@@ -770,62 +817,6 @@ class ConsumerCreditResponseParser extends ResponseParser
     }
 
     /**
-     * This method converts rating codes to their text equivalent. The rating code is also referred
-     * to as MOP (Manner of Payment) and payment rating. The description of each rating text is below
-     *
-     * X or -: The creditor did not report any data for that month. Note that the response
-     * XML may sometimes offer it's own corresponding rating text. In such cases, you may see a value
-     * of "TooNew" for this code. Practically speaking, they can both be treated the same: nothing available.
-     * C: The account is current and paid on time.
-     * 1: The account is 30-59 days late on payment.
-     * 2: The account is 60-89 days late on payment.
-     * 3: The account is 90-119 days late on payment.
-     * 4 or 5 or 6: The account is 120 or more days late on payment.
-     * 7: The account has been included in a bankruptcy filing.
-     * 8: The secured debt is overdue and the creditor has moved to repossess collateral to settle.
-     * 9: The unsecured debt is overdue and the creditor has written it off. This may--or may already have
-     * been--sold to a collection agency.
-     *
-     * @param string $code The rating code. Should be a single character.
-     * @param boolean $suppress_invalid False by default, but if set to true, submitting an invalid rating
-     * code will return an empty string instead of throwing an exception.
-     * @return string
-     */
-    public static function getRatingText(string $code, bool $suppress_invalid = false): string
-    {
-        $code = strtoupper(trim($code));
-        $rating_table = [
-            'X' => 'NoDataAvailable',
-            '-' => 'NoDataAvailable',
-            'C' => 'AsAgreed',
-            '1' => 'Late30Days',
-            '2' => 'Late60Days',
-            '3' => 'Late90Days',
-            '4' => 'Late120Days',
-            '5' => 'Late120Days',
-            '6' => 'Late120Days',
-            '7' => 'BankruptcyOrWageEarnerPlan',
-            '8' => 'ForeclosureOrRepossession',
-            '9' => 'CollectionOrChargeOff',
-        ];
-
-        //Loop through rating table to find a match and return it
-        foreach ($rating_table as $key => $value) {
-            if ($code === (string)$key) {
-                return $value;
-            }
-        }
-
-        /* If code makes it this far, then rating code provided isn't in our mapping table. Return exception
-        if the suppress invalid flag isn't set to true */
-        if ($suppress_invalid === true) {
-            return '';
-        } else {
-            throw new \Exception('Rating Code provided not a valid enumeration.');
-        }
-    }
-
-    /**
      * This will extract all the CREDIT_FILE labels for the corresponding person and load
      * it to the corresponding pre-defined array properties. This essentially bookmarks these nodes for quick
      * access for use with other functions that pull data from these nodes. SmartAPI will also return an
@@ -891,6 +882,21 @@ class ConsumerCreditResponseParser extends ResponseParser
             $this->borr_credit_file_labels = $credit_file_labels;
         } elseif ($id === $this->coborr_id) {
             $this->coborr_credit_file_labels = $credit_file_labels;
+        }
+    }
+
+    /**
+     * For functions where a person ID can be passed in to filter returned data, this checks to see
+     * if that value is valid
+     *
+     * @param string $id The ID of the person for which data is sought
+     * @return void
+     */
+    private function checkPersonID(string $id): void
+    {
+        if ($id !== $this->borr_id && $id !== $this->coborr_id) {
+            throw new \Exception('Person ID is invalid, must be any of the following ' .
+                $this->borr_id . ',' . $this->coborr_id);
         }
     }
 }

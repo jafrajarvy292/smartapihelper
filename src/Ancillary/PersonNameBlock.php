@@ -87,41 +87,6 @@ class PersonNameBlock
     }
 
     /**
-     * Validate a person's name by searching for any unusual characters
-     * This validates a single name field, not the entire name.
-     *
-     * @param string $name Name to be validated
-     * @return bool Returns true if name is valid, else false.
-     */
-    public static function validateName(string $name): bool
-    {
-        //Regex returns 1 if it finds any unacceptable characters
-        $is_valid = preg_match('/[^a-zA-z \-\'\.]/', $name);
-        //If regex returns 1 or false, it means unacceptable character was found or search failed.
-        if ($is_valid === 1 || $is_valid === false) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Validate a person's name suffix against pre-defined enumeration
-     *
-     * @param string $suffix
-     * @return bool Returns true if suffix is valid, else false.
-     */
-    public static function validateSuffix(string $suffix): bool
-    {
-        $is_valid = array_search(strtoupper($suffix), self::VALID_SUFFIXES);
-        if ($is_valid === false) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
      * Return first name
      *
      * @return string
@@ -201,5 +166,40 @@ class PersonNameBlock
                 appendChild($base->createTextNode($this->suffix));
         }
         return $parent;
+    }
+
+    /**
+     * Validate a person's name by searching for any unusual characters
+     * This validates a single name field, not the entire name.
+     *
+     * @param string $name Name to be validated
+     * @return bool Returns true if name is valid, else false.
+     */
+    public static function validateName(string $name): bool
+    {
+        //Regex returns 1 if it finds any unacceptable characters
+        $is_valid = preg_match('/[^a-zA-z \-\'\.]/', $name);
+        //If regex returns 1 or false, it means unacceptable character was found or search failed.
+        if ($is_valid === 1 || $is_valid === false) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Validate a person's name suffix against pre-defined enumeration
+     *
+     * @param string $suffix
+     * @return bool Returns true if suffix is valid, else false.
+     */
+    public static function validateSuffix(string $suffix): bool
+    {
+        $is_valid = array_search(strtoupper($suffix), self::VALID_SUFFIXES);
+        if ($is_valid === false) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

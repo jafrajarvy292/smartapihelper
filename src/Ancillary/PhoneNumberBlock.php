@@ -12,6 +12,8 @@ namespace jafrajarvy292\SmartAPIHelper\Ancillary;
  */
 class PhoneNumberBlock
 {
+    /** @var array Valid values for phone type, as defined by XML schema */
+    public const VALID_TYPES = ['Home', 'Mobile', 'Work', 'Other'];
     /** @var string The 10 digit phone number in format ########## */
     private $number;
     /** @var string An extension, if applicable */
@@ -27,8 +29,6 @@ class PhoneNumberBlock
      * - 222 444 5555
      */
     private const NUMBER_REGEX = '/^[^\d]?\d{3}[^\d]{0,2}\d{3}[^\d]?\d{4}$/';
-    /** @var array Valid values for phone type, as defined by XML schema */
-    public const VALID_TYPES = ['Home', 'Mobile', 'Work', 'Other'];
 
     /**
      * PhoneNumberBlock values are passed at time of instantiation
@@ -89,50 +89,6 @@ class PhoneNumberBlock
             $this->description = '';
         } else {
             $this->description = $description;
-        }
-    }
-
-    /**
-     * Validate the phone type against pre-defined enumeration
-     *
-     * @param string $type The user-provided phone type
-     * @return boolean Returns true if phone type provided is valid, else false
-     */
-    public static function validateType(string $type): bool
-    {
-        $type = ucfirst(strtolower($type));
-        $is_valid = array_search($type, self::VALID_TYPES);
-        if ($is_valid === false) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Validate the phone number against our pre-defined regex.
-     *
-     * @param string $number The user-provided number
-     * @return boolean Returns true if phone number is valid, else false
-     */
-    public static function validateNumber(string $number): bool
-    {
-        //Regex returns 1 if string is exactly 10 digits.
-        $is_valid = preg_match(self::NUMBER_REGEX, $number);
-        if ($is_valid === 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static function validateExt(string $extension): bool
-    {
-        $is_valid = preg_match('/^\d+$/', $extension);
-        if ($is_valid === 1) {
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -229,5 +185,49 @@ class PhoneNumberBlock
             ))->appendChild($base->createTextNode($this->description));
         }
         return $parent;
+    }
+
+    /**
+     * Validate the phone type against pre-defined enumeration
+     *
+     * @param string $type The user-provided phone type
+     * @return boolean Returns true if phone type provided is valid, else false
+     */
+    public static function validateType(string $type): bool
+    {
+        $type = ucfirst(strtolower($type));
+        $is_valid = array_search($type, self::VALID_TYPES);
+        if ($is_valid === false) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Validate the phone number against our pre-defined regex.
+     *
+     * @param string $number The user-provided number
+     * @return boolean Returns true if phone number is valid, else false
+     */
+    public static function validateNumber(string $number): bool
+    {
+        //Regex returns 1 if string is exactly 10 digits.
+        $is_valid = preg_match(self::NUMBER_REGEX, $number);
+        if ($is_valid === 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function validateExt(string $extension): bool
+    {
+        $is_valid = preg_match('/^\d+$/', $extension);
+        if ($is_valid === 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

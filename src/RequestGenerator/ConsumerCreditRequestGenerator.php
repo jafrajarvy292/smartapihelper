@@ -20,7 +20,10 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
     /**
      * As soon as this object is instantiated, it will generate the root element with namespace declarations.
      *
-     * @param ConsumerCreditRequestData $object The pertinent information for generating the full request document
+     * @param ConsumerCreditRequestData $data The pertinent information for generating the full request
+     * document
+     * @param string $xml_version_input The XML version
+     * @param string $encoding_input The encoding language
      */
     public function __construct(
         ConsumerCreditRequestData $data,

@@ -20,6 +20,18 @@ use jafrajarvy292\SmartAPIHelper\RequestGenerator\ConsumerCreditRequestGenerator
  */
 class ConsumerCreditRequestData
 {
+    /** @var array The types of requests that can be submitted. This will determine the final XML document
+     * that is generated.
+     * - Submit: Order a new credit report.
+     * - StatusQuery: Retrieve an existing credit report or query for its status.
+     * - Upgrade: Upgrade an existing credit report to add a spouse or additional credit bureaus.
+     * - Refresh: Order a "refresh" of an existing credit report.
+     * - PermUnmerge: Unmerge a borrower and/or bureau(s) from an existing file. The borrower and/or bureau(s)
+     * that the user wants to keep should be included in the XML request. This unmerged data will be stored to
+     * a new file with its own VendorOrderIdentifier. The original file is not modified in any way.
+     */
+    public const REQUEST_TYPES = ['Submit', 'StatusQuery', 'Upgrade', 'Refresh', 'PermUnmerge'];
+    
     /** Borrower's info */
     /** @var string Value used to reference the borrower when setting object properties */
     private $borr_id = 'b';
@@ -102,17 +114,6 @@ class ConsumerCreditRequestData
     private $request_type = '';
     /** @var string If querying an existing report, indicate the vendor-assigned ID here */
     private $vendor_order_id = '';
-    /** @var array The types of requests that can be submitted. This will determine the final XML document
-     * that is generated.
-     * - Submit: Order a new credit report.
-     * - StatusQuery: Retrieve an existing credit report or query for its status.
-     * - Upgrade: Upgrade an existing credit report to add a spouse or additional credit bureaus.
-     * - Refresh: Order a "refresh" of an existing credit report.
-     * - PermUnmerge: Unmerge a borrower and/or bureau(s) from an existing file. The borrower and/or bureau(s)
-     * that the user wants to keep should be included in the XML request. This unmerged data will be stored to
-     * a new file with its own VendorOrderIdentifier. The original file is not modified in any way.
-     */
-    public const REQUEST_TYPES = ['Submit', 'StatusQuery', 'Upgrade', 'Refresh', 'PermUnmerge'];
     
     /** Administrative Variables */
     /** @var string Signals to the vendor the API version under which this request should be processed. */
