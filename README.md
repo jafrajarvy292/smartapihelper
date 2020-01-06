@@ -3,7 +3,7 @@
 # SmartAPI Helper
 This is a PHP library for [MeridianLink's](http://www.meridianlink.com) SmartAPI interface.
 
-This library should be used only after a minimal review of the SmartAPI Integration Guide. The integration guide covers basic knowledge the software developer should have before starting their project. After reviewing the guide, this library can be used to expedite the integration process.
+This library should be used only after a review of the SmartAPI Integration Guide. The integration guide covers basic knowledge the software developer should have before starting their project. After reviewing the guide, this library can be used to expedite the integration process.
 
 The SmartAPI Integration Guide, which is included in the integration kit, can be obtained by reaching out to MeridianLink directly.
 
