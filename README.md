@@ -14,6 +14,7 @@ The SmartAPI Integration Guide, which is included in the integration kit, can be
 # Installation Instructions
 ## With Composer
 To install using composer:
+
     composer require jafrajarvy292/smartapihelper
 
 If composer's autoload file is already included in your project, then this library will automatically be loaded.
@@ -21,6 +22,7 @@ If composer's autoload file is already included in your project, then this libra
 Download the latest release and and extract to its own folder. Afterwards, require the autoloader file.
 
 For example, if you saved this to a folder named `smartapihelper`, then your require statement should look something like the following:
+
     require "smartapihelper/autoload.php";
 
 # Getting Started
