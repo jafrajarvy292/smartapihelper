@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -12,7 +11,7 @@ namespace jafrajarvy292\SmartAPIHelper\Ancillary;
  */
 class PersonNameBlock
 {
-    /** @var string First name */
+    /** @var string $first First name */
     private $first;
     /** @var string Last name */
     private $last;
@@ -24,15 +23,21 @@ class PersonNameBlock
     public const VALID_SUFFIXES = ['SR', 'JR', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
 
     /**
-     * A person's full name is required at time of instantiation
-     *
+     * A person's full name is required at time of instantiation. A few examples below:
+     * ```
+     * $person1_name = new PersonNameBlock('John','Jameson');
+     * $person1_name = new PersonNameBlock('Jack','Robinson','R');
+     * $person1_name = new PersonNameBlock('Jack','Robinson','','SR');
+     * ```
+     * 
      * @param string $first
      * @param string $last
      * @param string $middle
      * @param string $suffix
-     * @example $person1_name = new PersonNameBlock('John','Jameson');
-     * @example $person1_name = new PersonNameBlock('Jack','Robinson','R');
-     * @example $person1_name = new PersonNameBlock('Jack','Robinson','','SR');
+     * @throws \Exception If first name is empty or invalid
+     * @throws \Exception If last name is empty or invalid
+     * @throws \Exception If middle name is not valid
+     * @throws \Exception If suffix is not a valid enumeration
      */
     public function __construct(
         string $first,
@@ -130,20 +135,22 @@ class PersonNameBlock
      * Generates a person's name block and returns it as a node
      *
      * This generates a name block, sampled below, and returns it as a node, which can be appended under
-     * another element using appendChild()
-     *
-     *    <NAME>
-     *     <FirstName>Davie</FirstName>
-     *     <LastName>Testcase</LastName>
-     *     <MiddleName>R</MiddleName>
-     *     <SuffixName>JR</SuffixName>
-     *    </NAME>
-     *
+     * another element using appendChild(). An example of usage and the returning node is below:
+     * ```
+     * $element->appendChild($name->getXML($base));
+     * 
+     * <NAME>
+     *  <FirstName>Davie</FirstName>
+     *  <LastName>Testcase</LastName>
+     *  <MiddleName>R</MiddleName>
+     *  <SuffixName>JR</SuffixName>
+     * </NAME>
+     * ```
+     * 
      * @param \DOMDocument $base The DOM document we're adding this to
      * @param string|null $namespace The namespace this should be associated with. Null refers to default
      * namespace
      * @return \DOMNode
-     * @example $element->appendChild($name->getXML($base));
      */
     public function getXML(\DOMDocument $base, string $namespace = null): \DOMNode
     {

@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -17,11 +16,11 @@ namespace jafrajarvy292\SmartAPIHelper\RequestGenerator;
 abstract class RequestGenerator
 {
     /** @var string SmartAPI's default namespace */
-    protected const P1 = 'http://www.mismo.org/residential/2009/schemas';
+    public const P1 = 'http://www.mismo.org/residential/2009/schemas';
     /** @var string Namespace used for xlinks */
-    protected const P2 = 'http://www.w3.org/1999/xlink';
+    public const P2 = 'http://www.w3.org/1999/xlink';
     /** @var string Namespace used for MCL-specific extensions */
-    protected const P3 = 'inetapi/MISMO3_4_MCL_Extension.xsd';
+    public const P3 = 'inetapi/MISMO3_4_MCL_Extension.xsd';
     /** @var \DOMDocument This will hold the XML document upon which we build the request file */
     protected $base;
     /** @var \DOMElement This will hold the root element */
@@ -32,8 +31,8 @@ abstract class RequestGenerator
     /**
      * Instantiates the various XML objects, which is called from classes that extend this one.
      *
-     * @param string $xml_version Standard XML declaration.
-     * @param string $encoding Standard XML declaration.
+     * @param string $xml_version_input Standard XML declaration.
+     * @param string $encoding_input Standard XML declaration.
      */
     protected function __construct(
         string $xml_version_input = '1.0',

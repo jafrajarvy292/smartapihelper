@@ -1,7 +1,7 @@
 [![License MIT](http://img.shields.io/github/license/jafrajarvy292/smartapihelper)](https://opensource.org/licenses/MIT)
 
 [GitHub Page](https://github.com/jafrajarvy292/smartapihelper)  
-[Documentation Page](http://www.meridianlink.com)
+[Documentation Page](https://sample.asuscomm.com/smartapihelper_documentation/html)
 
 # SmartAPI Helper
 This is a PHP library for [MeridianLink's](http://www.meridianlink.com) SmartAPI interface.

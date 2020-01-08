@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -12,6 +11,7 @@ namespace jafrajarvy292\SmartAPIHelper\Ancillary;
  */
 class ResponseFormats
 {
+    /** @var array The pre-defined enumeration of the types of response formats that can be requested. */
     public const DEFINED_TYPES = ['Xml', 'Html', 'Pdf'];
     /** @var array Holds the flags for the 3 primary formats offered by SmartAPI */
     private $formats = [];
@@ -37,6 +37,7 @@ class ResponseFormats
      * @param string $format The format being requested. Note this field is typically case-sensitive.
      * @param boolean $flag Set to true or false
      * @return void
+     * @throws \Exception If format provided isn't part of pre-defined enumeration
      */
     public function setCustomFormat(string $format, bool $flag): void
     {
@@ -133,31 +134,34 @@ class ResponseFormats
      * This function will generate a full SERVICE_PREFERRED_RESPONSE_FORMATS block and return it as
      * an XML node, which can be appended to an element using appendChild(). A sample of the block is below.
      * getCount() method should be called first to check if at least one preferred method is indicated before
-     * inserting the XML block, else you'll end up with a container with nothing in it.
+     * inserting the XML block, else you'll end up with a container with nothing in it. Below is an example
+     * of usage and corresponding node returned:
+     * ```
+     * $parent->appendChild($data->getResponseFormats()->getXML($base));
      *
-     *    <SERVICE_PREFERRED_RESPONSE_FORMATS>
-     *     <SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *      <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *       <PreferredResponseFormatType>Xml</PreferredResponseFormatType>
-     *      </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *     </SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *     <SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *      <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *       <PreferredResponseFormatType>Html</PreferredResponseFormatType>
-     *      </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *     </SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *     <SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *      <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *       <PreferredResponseFormatType>Pdf</PreferredResponseFormatType>
-     *      </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
-     *     </SERVICE_PREFERRED_RESPONSE_FORMAT>
-     *    </SERVICE_PREFERRED_RESPONSE_FORMATS>
+     * <SERVICE_PREFERRED_RESPONSE_FORMATS>
+     *  <SERVICE_PREFERRED_RESPONSE_FORMAT>
+     *   <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *    <PreferredResponseFormatType>Xml</PreferredResponseFormatType>
+     *   </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *  </SERVICE_PREFERRED_RESPONSE_FORMAT>
+     *  <SERVICE_PREFERRED_RESPONSE_FORMAT>
+     *   <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *    <PreferredResponseFormatType>Html</PreferredResponseFormatType>
+     *   </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *  </SERVICE_PREFERRED_RESPONSE_FORMAT>
+     *  <SERVICE_PREFERRED_RESPONSE_FORMAT>
+     *   <SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *    <PreferredResponseFormatType>Pdf</PreferredResponseFormatType>
+     *   </SERVICE_PREFERRED_RESPONSE_FORMAT_DETAIL>
+     *  </SERVICE_PREFERRED_RESPONSE_FORMAT>
+     * </SERVICE_PREFERRED_RESPONSE_FORMATS>
+     * ```
      *
      * @param \DOMDocument $base The XML document to which we'll be adding the nodes
      * @param string|null $namespace The namespace URI under which this container should belong. Null refers
      * to default namespace
      * @return \DOMNode Returns a single node that can be appended to another node via appendChild()
-     * @example $parent->appendChild($data->getResponseFormats()->getXML($base));
      */
     public function getXML(\DOMDocument $base, string $namespace = null): \DOMNode
     {

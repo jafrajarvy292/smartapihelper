@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -65,6 +64,7 @@ class HTTPHandler
      * @param bool $colon_exception Colons are not allowed in the user login name with Basic Auth scheme. Set
      * this flag to true to ignore this. Note that your login attempt will probably fail, though.
      * @return void
+     * @throws \Exception If user login name is blank or contains a colon
      */
     public function setUserLogin(string $login, bool $colon_exception = false): void
     {
@@ -83,6 +83,7 @@ class HTTPHandler
      *
      * @param string $password The password value
      * @return void
+     * @throws \Exception If password is empty
      */
     public function setUserPassword(string $password): void
     {
@@ -98,6 +99,7 @@ class HTTPHandler
      *
      * @param string $url The URL
      * @return void
+     * @throws \Exception If HTTP endpoint is empty
      */
     public function setHTTPEndpoint(string $url): void
     {
@@ -114,6 +116,7 @@ class HTTPHandler
      *
      * @param string $interface The MCL-Inteface value
      * @return void
+     * @throws \Exception if MCL-Interface value is empty.
      */
     public function setMCLInterface(string $interface): void
     {
@@ -142,10 +145,14 @@ class HTTPHandler
     /**
      * Set the path to the certificate bundle to use to validate server's SSL cert. The cURL extension
      * will typically have this already defaulted to a certain file or folder, this allows you to override it.
+     * Below is an example of using this method:
+     * ```
+     * $manager->setCURLCertFile(__DIR__ . 'cert_database/ca-bundle.pem');
+     * ```
      *
      * @param string $path Path to the file
      * @return void
-     * @example location description
+     * @throws \Exception If file path to certificate bundle does not exist
      */
     public function setCURLCertFile(string $path): void
     {
@@ -345,6 +352,7 @@ class HTTPHandler
      * Returns the status of the most recent cURL execution
      *
      * @return bool Returns true if latest execution was successful, else false
+     * @throws \Exception If cURL hasn't been submitted/executed yet
      */
     public function wasCURLSuccessful(): bool
     {
@@ -378,11 +386,15 @@ class HTTPHandler
     /**
      * This will set the logging flag to true, which will log communication with the server. The output
      * will be placed in the directory provided in the argument.
-     * The files are not stripped of sensitive data; they should be deleted when no longer needed.
-     *
+     * The files are not stripped of sensitive data; they should be deleted when no longer needed. Example
+     * of calling this method is below:
+     * ```
+     * $object->enableLogging('./TempFolder/');
+     * ```
+
      * @param string $output_folder The folder where you want the log files output.
      * @return void
-     * @example $object->enableLogging('./TempFolder/');
+     * @throws \Exception If the path to which the logging is being output does not exist
      */
     public function enableLogging(string $output_folder): void
     {
@@ -411,6 +423,12 @@ class HTTPHandler
      * submitting the request.
      *
      * @return void
+     * @throws \Exception If user login name is not present
+     * @throws \Exception If password is not present
+     * @throws \Exception If HTTP endpoint is not set
+     * @throws \Exception If MCL-Interface value is not set
+     * @throws \Exception If the body is empty / does not contain the XML request string
+     * @throws \Exception if cURL extension is not installed
      */
     private function curlPrep(): void
     {

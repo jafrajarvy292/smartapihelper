@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -87,7 +86,7 @@ class AddressBlock
         'WV' => 'WEST VIRGINIA',
         'WY' => 'WYOMING'];
     /** @var array Array of valid country abbreviations */
-    public const VALID_COUNTRIES = ['US' => 'UNITED STATES','CA' => 'CANADA'];
+    public const VALID_COUNTRIES = ['US' => 'UNITED STATES', 'CA' => 'CANADA'];
     /** @var string Regex of a standard 5 digit US zip code */
     public const US_ZIP_REGEX = '/^\d{5}$/';
     /** @var string Regex of a standard 5 digit US zip+4 code with hyphen separator */
@@ -106,14 +105,20 @@ class AddressBlock
     private $country;
 
     /**
-     * Constructor function. Requires full address to be passed in upon instantiation
-     *
+     * Constructor function. Requires full address to be passed in upon instantiation. Example below.
+     * ```
+     * $object = new AddressBlock('123 Main St.','Santa Ana','CA','92626','US');
+     * ```
      * @param string $street Full street address (e.g. 123 N Main St #389);
      * @param string $city
      * @param string $state 2-character abbreviation
      * @param string $zip
      * @param string $country 2-character abbreviation
-     * @example $object = new AddressBlock('123 Main St.','Santa Ana','CA','92626','US');
+     * @throws \Exception If street is empty or has invalid characters
+     * @throws \Exception If city is empty
+     * @throws \Exception If state abbreivation is empty or invalid
+     * @throws \Exception If zip code is not of a valid format or empty
+     * @throws \Exception If country code is empty or invalid
      */
     public function __construct(
         string $street,
@@ -247,24 +252,26 @@ class AddressBlock
     }
     
     /**
-     * Generates an address block and returns it as a node
+     * Generates an address block and returns it as a node.
      *
      * This function will generate a full address block and return it as a DOM node, which can be
-     * appended to an element using appendChild(). A sample of the address block is below.
+     * appended to an element using appendChild(). A sample of usage and the address block is below:
+     * ```
+     * $element->appendChild($address->getXML($base));
      *
-     *    <ADDRESS>
-     *     <AddressLineText>123 Main St #2</AddressLineText>
-     *     <CityName>Irvine</CityName>
-     *     <CountryCode>US</CountryCode>
-     *     <PostalCode>93842</PostalCode>
-     *     <StateCode>CA</StateCode>
-     *    </ADDRESS>
+     * <ADDRESS>
+     *  <AddressLineText>123 Main St #2</AddressLineText>
+     *  <CityName>Irvine</CityName>
+     *  <CountryCode>US</CountryCode>
+     *  <PostalCode>93842</PostalCode>
+     *  <StateCode>CA</StateCode>
+     * </ADDRESS>
+     * ```
      *
      * @param \DOMDocument $base The DOMDocument to which we'll be adding this address block
      * @param string|null $namespace The namespace associated with the elements. Null refers to default
      * namespace
      * @return \DOMNode
-     * @example $element->appendChild($address->getXML($base));
      */
     public function getXML(\DOMDocument $base, string $namespace = null): \DOMNode
     {
@@ -289,7 +296,7 @@ class AddressBlock
     /**
      * Validate the street address against characters that aren't typically present in an address
      *
-     * @param string $street
+     * @param string $street The full street address (i.e. 123 Main St #334)
      * @return bool Returns true if the street passes validation
      */
     public static function validateStreet(string $street): bool

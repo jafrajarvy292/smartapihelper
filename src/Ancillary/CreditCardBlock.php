@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -52,6 +51,7 @@ class CreditCardBlock
      *
      * @param string $number
      * @return void
+     * @throws \Exception If credit card number is empty or fails luhn check
      */
     public function setCardNumber(string $number): void
     {
@@ -68,13 +68,16 @@ class CreditCardBlock
     }
 
     /**
-     * Set the expiration month. Will accept 1 or 2 digit value.
+     * Set the expiration month. Will accept 1 or 2 digit value. A few examples below:
+     * ```
+     * $object->setExpMonth('01');
+     * $object->setExpMonth('1');
+     * $object->setExpMonth(2);
+     * ```
      *
      * @param string|int $month Expiration month as string or int.
      * @return void
-     * @example $object->setExpMonth('01');
-     * @example $object->setExpMonth('1');
-     * @example $object->setExpMonth(2);
+     * @throws \Exception If month is not a valid
      */
     public function setExpMonth(string $month): void
     {
@@ -97,12 +100,15 @@ class CreditCardBlock
     }
 
     /**
-     * Set the expiration year
+     * Set the expiration year. A few examples below:
+     * ```
+     * $object->setExpYear(2020);
+     * $object->setExpYear('2020');
+     * ```
      *
      * @param string|int $year Expiration year as string or int in YYYY format.
      * @return void
-     * @example $object->setExpYear(2020);
-     * @example $object->setExpYear('2020');
+     * @throws \Exception If expiration year is not a valid string or integer
      */
     public function setExpYear(string $year): void
     {
@@ -123,6 +129,7 @@ class CreditCardBlock
      *
      * @param string $cvv Should be a 3 or 4 digit code
      * @return void
+     * @throws \Exception if CVV is not 3 or 4 digits
      */
     public function setCVV(string $cvv): void
     {
@@ -203,34 +210,37 @@ class CreditCardBlock
      * Generates a credit card payment block and inserts it
      *
      * This function will generate a full credit card payment data block and return it as a DOM node,
-     * which can be appended to an element using appendChild(). A sample of the card block is below.
+     * which can be appended to an element using appendChild(). A sample of the usage and returning card
+     * block is below.
+     * ```
+     * $element->appendChild($credit_card->getXML($base));
      *
-     *    <SERVICE_PAYMENT>
-     *     <ADDRESS>
-     *      <AddressLineText>123 Main St</AddressLineText>
-     *      <CityName>Garden Grove</CityName>
-     *      <CountryCode>US</CountryCode>
-     *      <PostalCode>58394</PostalCode>
-     *      <StateCode>CA</StateCode>
-     *     </ADDRESS>
-     *     <NAME>
-     *      <FirstName>David</FirstName>
-     *      <LastName>Testcase</LastName>
-     *      <MiddleName>R</MiddleName>
-     *      <SuffixName>JR</SuffixName>
-     *     </NAME>
-     *     <SERVICE_PAYMENT_DETAIL>
-     *     <ServicePaymentAccountIdentifier>4111111111111111</ServicePaymentAccountIdentifier>
-     *      <ServicePaymentCreditAccountExpirationDate>2021-02</ServicePaymentCreditAccountExpirationDate>
-     *      <ServicePaymentSecondaryCreditAccountIdentifier>334</ServicePaymentSecondaryCreditAccountIdentifier>
-     *     </SERVICE_PAYMENT_DETAIL>
-     *    </SERVICE_PAYMENT>
+     * <SERVICE_PAYMENT>
+     *  <ADDRESS>
+     *   <AddressLineText>123 Main St</AddressLineText>
+     *   <CityName>Garden Grove</CityName>
+     *   <CountryCode>US</CountryCode>
+     *   <PostalCode>58394</PostalCode>
+     *   <StateCode>CA</StateCode>
+     *  </ADDRESS>
+     *  <NAME>
+     *   <FirstName>David</FirstName>
+     *   <LastName>Testcase</LastName>
+     *   <MiddleName>R</MiddleName>
+     *   <SuffixName>JR</SuffixName>
+     *  </NAME>
+     *  <SERVICE_PAYMENT_DETAIL>
+     *  <ServicePaymentAccountIdentifier>4111111111111111</ServicePaymentAccountIdentifier>
+     *   <ServicePaymentCreditAccountExpirationDate>2021-02</ServicePaymentCreditAccountExpirationDate>
+     *   <ServicePaymentSecondaryCreditAccountIdentifier>334</ServicePaymentSecondaryCreditAccountIdentifier>
+     *  </SERVICE_PAYMENT_DETAIL>
+     * </SERVICE_PAYMENT>
+     * ```
      *
      * @param \DOMDocument $base The DOMDocument to which we'll be adding this address block
      * @param string|null $namespace The namespace associated with thse elements. Null refers to default
      * namespace
      * @return \DOMNode
-     * @example $element->appendChild($credit_card->getXML($base));
      */
     public function getXML(\DOMDocument $base, string $namespace = null): \DOMNode
     {

@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -124,6 +123,9 @@ class ConsumerCreditResponseParser extends ResponseParser
      *
      * @param string $id The ID of the person you wan to grab the data for.
      * @return array Returns an array of associative arrays
+     * @throws \Exception If borrower data is requested, but is not present in the response data. It's nearly
+     * impossible for this to happen, as a file will always have at least a primary borrower.
+     * @throws \Exception If coborrower data is requested, is not present in the response data
      */
     public function getBureauResponses(string $id): array
     {
@@ -385,6 +387,9 @@ class ConsumerCreditResponseParser extends ResponseParser
      *
      * @param string $id The ID of the person for which the labels are sought.
      * @return array
+     * @throws \Exception If borrower data is being requested, but they are not present in the response file.
+     * This is nearly impossible, since files will always have at least a primary borrower
+     * @throws \Exception If coborrower data is being requested, but they are not present in the response.
      */
     public function getCreditFileLabels(string $id): array
     {
@@ -525,6 +530,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      * @param boolean $suppress_invalid False by default, but if set to true, submitting an invalid rating
      * code will return an empty string instead of throwing an exception.
      * @return string
+     * @throws \Exception If rating code provided is not a valid enumeration
      */
     public static function getRatingText(string $code, bool $suppress_invalid = false): string
     {
@@ -825,6 +831,9 @@ class ConsumerCreditResponseParser extends ResponseParser
      *
      * @param string $id The ID of the person we want to load the labels for
      * @return void
+     * @throws \Exception If borrower data is being requested, but they are not present in the response file.
+     * This is nearly impossible, since files will always have at least a primary borrower
+     * @throws \Exception If coborrower data is being requested, but they are not present in the response.
      */
     private function loadCreditFileLabels(string $id): void
     {
@@ -891,6 +900,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      *
      * @param string $id The ID of the person for which data is sought
      * @return void
+     * @throws \Exception If the person ID passed in doesn't match any applicant
      */
     private function checkPersonID(string $id): void
     {

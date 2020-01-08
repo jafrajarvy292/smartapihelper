@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -28,17 +27,22 @@ class PhoneNumberBlock
      * - 4445556666
      * - 222 444 5555
      */
-    private const NUMBER_REGEX = '/^[^\d]?\d{3}[^\d]{0,2}\d{3}[^\d]?\d{4}$/';
+    public const NUMBER_REGEX = '/^[^\d]?\d{3}[^\d]{0,2}\d{3}[^\d]?\d{4}$/';
 
     /**
-     * PhoneNumberBlock values are passed at time of instantiation
+     * PhoneNumberBlock values are passed at time of instantiation. Examples below:
+     * ```
+     * $phone = new PhoneNumberBlock('7143334444')
+     * $phone = new PhoneNumberBlock('7143334444','3432,'Other','Front Desk')
+     * ```
      *
      * @param string $number 10 digit phone number
      * @param string|null $extension Phone extension, if applicable
      * @param string $type Phone type, should coincide with enumerated list
      * @param string|null $description If phone type is Other, then briefly describe it
-     * @example $phone = new PhoneNumberBlock('7143334444')
-     * @example $phone = new PhoneNumberBlock('7143334444','3432,'Other','Front Desk')
+     * @throws \Exception If phone number is emtpy or of an invalid format
+     * @throws \Exception If phone extension contains anything other than digits
+     * @throws \Exception If phone type is not a valid enumeration
      */
     public function __construct(
         string $number,
@@ -136,24 +140,26 @@ class PhoneNumberBlock
      * Generates a person's phone block and returns it as a node
      *
      * This generates a phone block, sampled below, and returns it as a node, which can be appended under
-     * another element using appendChild()
+     * another element using appendChild(). Example of usage and returned node below:
+     * ```
+     * $element->appendChild($phone->getXML($base));
      *
-     *    <CONTACT_POINT>
-     *     <CONTACT_POINT_TELEPHONE>
-     *      <ContactPointTelephoneExtensionValue>234</ContactPointTelephoneExtensionValue>
-     *      <ContactPointTelephoneValue>7143337777</ContactPointTelephoneValue>
-     *     </CONTACT_POINT_TELEPHONE>
-     *     <CONTACT_POINT_DETAIL>
-     *      <ContactPointRoleType>Other</ContactPointRoleType>
-     *      <ContactPointRoleTypeOtherDescription>Moms Phone</ContactPointRoleTypeOtherDescription>
-     *     </CONTACT_POINT_DETAIL>
-     *    </CONTACT_POINT>
+     * <CONTACT_POINT>
+     *  <CONTACT_POINT_TELEPHONE>
+     *   <ContactPointTelephoneExtensionValue>234</ContactPointTelephoneExtensionValue>
+     *   <ContactPointTelephoneValue>7143337777</ContactPointTelephoneValue>
+     *  </CONTACT_POINT_TELEPHONE>
+     *  <CONTACT_POINT_DETAIL>
+     *   <ContactPointRoleType>Other</ContactPointRoleType>
+     *   <ContactPointRoleTypeOtherDescription>Moms Phone</ContactPointRoleTypeOtherDescription>
+     *  </CONTACT_POINT_DETAIL>
+     * </CONTACT_POINT>
+     * ```
      *
      * @param \DOMDocument $base The DOM document we're adding this to
      * @param string|null $namespace The namespace this should be associated with. Null refers to default
      * namespace
      * @return \DOMNode
-     * @example $element->appendChild($phone->getXML($base));
      */
     public function getXML(\DOMDocument $base, string $namespace = null): \DOMNode
     {

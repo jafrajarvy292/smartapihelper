@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -41,6 +40,11 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generate the full request XML file and return it as a string
      *
      * @return string The full XML request document as a string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower's current address is empty
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but current address is empty
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
      */
     public function outputXMLString(): string
     {
@@ -428,6 +432,10 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generates an XML file for a status/reissue request
      *
      * @return string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
+     * @throws \Exception If VendorOrderIdentifier is empty
      */
     private function outputXMLforStatusQuery(): string
     {
@@ -595,6 +603,10 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * bureaus
      *
      * @return string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
+     * @throws \Exception If VendorOrderIdentifier is empty
      */
     private function outputXMLforUpgrade(): string
     {
@@ -810,6 +822,12 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generates XML string for a Refresh report order
      *
      * @return string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower's current address is empty
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but current address is emtpy
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
+     * @throws \Exception If VendorOrderIdentifier is empty
      */
     private function outputXMLforRefresh(): string
     {
@@ -1164,6 +1182,10 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generates an XML string for a permanent unmerge request
      *
      * @return string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
+     * @throws \Exception If VendorOrderIdentifier is empty
      */
     private function outputXMLforPermUnmerge(): string
     {

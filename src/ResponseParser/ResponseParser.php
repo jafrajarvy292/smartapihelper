@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -78,6 +77,8 @@ abstract class ResponseParser
      * @param string $xml_response The XML, as a string, that we received from the server
      * @param string $xml_ver XML version
      * @param string $encoding XML encoding language
+     * @throws \Exception If the XML response is empty
+     * @throws \Exception If the XML response doesn't contain MESSAGE for its root element
      */
     public function loadXMLResponse(
         string $xml_response,
@@ -157,10 +158,10 @@ abstract class ResponseParser
      * that the SmartAPI Helper library doesn't specifically provide a method for retrieving. The below
      * outlines the associative array that is returned:
      *
-     * 'DOMDocument' => \DOMDocument (This is a clone of the XML document received from the server)
-     * 'DOMXPath' => \DOMXPath (This is the xpath object associated with the DOMDocument clone. This would be
+     * - 'DOMDocument' => \DOMDocument (This is a clone of the XML document received from the server)
+     * - 'DOMXPath' => \DOMXPath (This is the xpath object associated with the DOMDocument clone. This would be
      * used to navigate through the document.)
-     * 'Namespaces' => [] (This is an associative array of all the namespaces that have been registered
+     * - 'Namespaces' => [] (This is an associative array of all the namespaces that have been registered
      * with the XML document and xpath object. The keys are the namespace prefix, the values are the
      * namespace URIs)
      *
@@ -269,6 +270,8 @@ abstract class ResponseParser
      * child class when the XML doc is initially loaded to the object
      *
      * @return void
+     * @throws \Exception If a status could not be determined after checking various parts of the response
+     * @throws \Exception If a StatusCode was returned, but isn't one of the expected enumerations
      */
     protected function parseStatus(): void
     {

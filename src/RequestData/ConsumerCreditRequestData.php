@@ -1,7 +1,6 @@
 <?php
 
 /**
- * @package SmartAPI Helper
  * @author David Tran <hunterr83@gmail.com>
  */
 
@@ -136,6 +135,7 @@ class ConsumerCreditRequestData
      *
      * @param string $id This should match $this->borr_id or $this->coborr_id
      * @return void
+     * @throws \Exception If Person ID passed in does not exist
      */
     private function checkPersonID(string $id): void
     {
@@ -147,7 +147,7 @@ class ConsumerCreditRequestData
     /**
      * Set the full name for a person
      *
-     * @param string $person ID used to reference which person this is for
+     * @param string $person_id ID used to reference which person this is for
      * @param PersonNameBlock|null $name The person's full name
      * @return void
      */
@@ -167,6 +167,7 @@ class ConsumerCreditRequestData
      * @param string $person_id ID used to reference which person this is for.
      * @param string $ssn SSN for the person, should be a string of 9 digits, no special chars
      * @return void
+     * @throws \Exception If SSN is not of a valid format
      */
     public function setSSN(string $person_id, string $ssn): void
     {
@@ -197,6 +198,7 @@ class ConsumerCreditRequestData
      * @param AddressBlock|null $address A full address
      * @param string $type The address type: Current, Prior, or Mailing
      * @return void
+     * @throws \Exception If address type is an invalid enumeration
      */
     public function setAddress(string $person_id, AddressBlock $address = null, string $type = 'Current'): void
     {
@@ -240,6 +242,7 @@ class ConsumerCreditRequestData
      * @param string $dob DOB of the person in YYYY-MM-DD or MM-DD-YYYY format. Will ultimately be stored in
      * YYYY-MM-DD format.
      * @return void
+     * @throws \Exception If DOB is of an invalid format
      */
     public function setDOB(string $person_id, string $dob): void
     {
@@ -296,6 +299,7 @@ class ConsumerCreditRequestData
      * @param string $person_id ID used to reference which person this is for
      * @param string $email A single email address associated with the person.
      * @return void
+     * @throws \Exception If email address is invalid or more than one email was provided
      */
     public function setEmail(string $person_id, string $email): void
     {
@@ -419,6 +423,7 @@ class ConsumerCreditRequestData
      *
      * @param string $request This should match a pre-defined enumeration
      * @return void
+     * @throws \Exception If request type is not a valid enumeration
      */
     public function setRequestType(string $request): void
     {
@@ -468,6 +473,7 @@ class ConsumerCreditRequestData
      *
      * @param string $data_version The API version
      * @return void
+     * @throws \Exception If data version ID is blank
      */
     public function setDataVersion(string $data_version = '201703'): void
     {
