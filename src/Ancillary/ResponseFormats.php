@@ -7,11 +7,17 @@
 namespace jafrajarvy292\SmartAPIHelper\Ancillary;
 
 /**
- * Holds the indicated preferred response formats.
+ * Holds the indicated preferred response formats. Preferred response formats tell the system, when returning
+ * a completed order, what formats you want the report in.
  */
 class ResponseFormats
 {
-    /** @var array The pre-defined enumeration of the types of response formats that can be requested. */
+    /** @var array The pre-defined enumeration of the types of response formats that can be requested.
+     * - Xml: Will return the completed reports in a parsable XML format. Good format if you need to parse
+     * specific data points and do things with them
+     * - Html: Returns the full HTML report wrapped in a CDATA segment
+     * - Pdf: Returns the full PDF report encoded in base64.
+     */
     public const DEFINED_TYPES = ['Xml', 'Html', 'Pdf'];
     /** @var array Holds the flags for the 3 primary formats offered by SmartAPI */
     private $formats = [];
@@ -32,12 +38,13 @@ class ResponseFormats
 
     /**
      * In the event that SmartAPI is enhanced to support more formats than the pre-defined ones,
-     * you can add them here.
+     * you can add them here. Example below:
      *
      * @param string $format The format being requested. Note this field is typically case-sensitive.
      * @param boolean $flag Set to true or false
      * @return void
-     * @throws \Exception If format provided isn't part of pre-defined enumeration
+     * @throws \Exception If format provided is an existing pre-defined enumeration. This method should not
+     * be used to set pre-defined formats.
      */
     public function setCustomFormat(string $format, bool $flag): void
     {
@@ -86,7 +93,10 @@ class ResponseFormats
     }
 
     /**
-     * Returns an array of all formats that are set to true
+     * Returns an array of all formats that are set to true Example below:
+     * ```
+     * ['Xml', 'Pdf']
+     * ```
      *
      * @return array
      */
@@ -103,7 +113,12 @@ class ResponseFormats
     }
 
     /**
-     * Returns an associative array of all formats, regardless of their flag
+     * Returns an associative array of all formats, regardless of their flag. Example below:
+     * ```
+     * ['Xml'] => true
+     * ['Html'] => true
+     * ['Pdf'] => false
+     * ```
      *
      * @return array
      */

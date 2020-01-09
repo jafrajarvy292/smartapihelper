@@ -29,7 +29,7 @@ class PersonNameBlock
      * $person1_name = new PersonNameBlock('Jack','Robinson','R');
      * $person1_name = new PersonNameBlock('Jack','Robinson','','SR');
      * ```
-     * 
+     *
      * @param string $first
      * @param string $last
      * @param string $middle
@@ -138,7 +138,7 @@ class PersonNameBlock
      * another element using appendChild(). An example of usage and the returning node is below:
      * ```
      * $element->appendChild($name->getXML($base));
-     * 
+     *
      * <NAME>
      *  <FirstName>Davie</FirstName>
      *  <LastName>Testcase</LastName>
@@ -146,7 +146,7 @@ class PersonNameBlock
      *  <SuffixName>JR</SuffixName>
      * </NAME>
      * ```
-     * 
+     *
      * @param \DOMDocument $base The DOM document we're adding this to
      * @param string|null $namespace The namespace this should be associated with. Null refers to default
      * namespace

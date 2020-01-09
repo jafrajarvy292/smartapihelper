@@ -77,7 +77,7 @@ class CreditCardBlock
      *
      * @param string|int $month Expiration month as string or int.
      * @return void
-     * @throws \Exception If month is not a valid
+     * @throws \Exception If month is not valid
      */
     public function setExpMonth(string $month): void
     {
@@ -177,7 +177,7 @@ class CreditCardBlock
     }
 
     /**
-     * Return the card expiration month
+     * Return the card expiration month as a 2 digit string
      *
      * @return string
      */
@@ -187,7 +187,7 @@ class CreditCardBlock
     }
 
     /**
-     * Return the card expiration year
+     * Return the card expiration year as a 4 digit string
      *
      * @return string
      */
@@ -207,7 +207,7 @@ class CreditCardBlock
     }
 
     /**
-     * Generates a credit card payment block and inserts it
+     * Generates a credit card payment block for XML insertion
      *
      * This function will generate a full credit card payment data block and return it as a DOM node,
      * which can be appended to an element using appendChild(). A sample of the usage and returning card

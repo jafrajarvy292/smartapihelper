@@ -62,7 +62,7 @@ class HTTPHandler
      *
      * @param string $login The login name
      * @param bool $colon_exception Colons are not allowed in the user login name with Basic Auth scheme. Set
-     * this flag to true to ignore this. Note that your login attempt will probably fail, though.
+     * this flag to true to ignore this.
      * @return void
      * @throws \Exception If user login name is blank or contains a colon
      */
@@ -165,7 +165,7 @@ class HTTPHandler
     }
 
     /**
-     * Stores the XML request string to the corresponding object property
+     * Loads the XML string that will be sent to the server
      *
      * @param string $document The full XML request string to be sent to SmartAPI service
      * @return void
@@ -176,7 +176,9 @@ class HTTPHandler
     }
 
     /**
-     * Set the amount of time we wait for the submission to complete, in seconds.
+     * Set the amount of time we are willing to wait for the transaction to complete, in seconds, before we
+     * give up. Specifically, the time from when we start sending the request to the time the response
+     * is done streaming to us.
      *
      * @param integer $duration The timeout, in seconds
      * @return void

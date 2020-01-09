@@ -14,13 +14,13 @@ class PhoneNumberBlock
     /** @var array Valid values for phone type, as defined by XML schema */
     public const VALID_TYPES = ['Home', 'Mobile', 'Work', 'Other'];
     /** @var string The 10 digit phone number in format ########## */
-    private $number;
+    private $number = '';
     /** @var string An extension, if applicable */
-    private $extension;
+    private $extension = '';
     /** @var string The phone number type (e.g. Home, Work, etc) */
-    private $type;
+    private $type = 'Home';
     /** @var string Description of the number if type if Other */
-    private $description;
+    private $description = '';
     /** @var string The regular expression for what is considered a valid 10 digit phone number. Will accept
      * the following or similar common formats:
      * - (888) (444-5555)
@@ -37,18 +37,18 @@ class PhoneNumberBlock
      * ```
      *
      * @param string $number 10 digit phone number
-     * @param string|null $extension Phone extension, if applicable
+     * @param string $extension Phone extension, if applicable
      * @param string $type Phone type, should coincide with enumerated list
-     * @param string|null $description If phone type is Other, then briefly describe it
+     * @param string $description If phone type is Other, then briefly describe it
      * @throws \Exception If phone number is emtpy or of an invalid format
      * @throws \Exception If phone extension contains anything other than digits
      * @throws \Exception If phone type is not a valid enumeration
      */
     public function __construct(
         string $number,
-        string $extension = null,
+        string $extension = '',
         string $type = 'Home',
-        string $description = null
+        string $description = ''
     ) {
         //Validate phone number before saving
         $number = trim($number);
@@ -227,6 +227,12 @@ class PhoneNumberBlock
         }
     }
 
+    /**
+     * Validate a phone's extension (i.e. makes sure it's just numbers)
+     *
+     * @param string $extension Extension value
+     * @return boolean Returns true if ext contains only numbers, else false
+     */
     public static function validateExt(string $extension): bool
     {
         $is_valid = preg_match('/^\d+$/', $extension);

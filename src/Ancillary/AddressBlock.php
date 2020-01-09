@@ -7,7 +7,7 @@
 namespace jafrajarvy292\SmartAPIHelper\Ancillary;
 
 /**
- * Holds a standard address
+ * Holds a standard address block
  */
 class AddressBlock
 {
@@ -316,7 +316,7 @@ class AddressBlock
      * and Canadian provinces.
      *
      * @param string $state 2-character state abbreviation
-     * @return bool Returns true if the state abbreviation is found under US or Canada
+     * @return bool Returns true if the state abbreviation is found in our list
      */
     public static function validateState(string $state): bool
     {

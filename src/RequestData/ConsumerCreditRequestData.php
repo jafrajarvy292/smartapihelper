@@ -15,7 +15,7 @@ use jafrajarvy292\SmartAPIHelper\RequestGenerator\ConsumerCreditRequestGenerator
 
 /**
  * Stores all the information needed to submit various type of requests for consumer credit and also generate
- * the corresponding XML request for them.
+ * the corresponding XML request string for them.
  */
 class ConsumerCreditRequestData
 {
@@ -195,7 +195,7 @@ class ConsumerCreditRequestData
      * Provide the full address for a specific address entry
      *
      * @param string $person_id ID used to reference which person this is for.
-     * @param AddressBlock|null $address A full address
+     * @param AddressBlock|null $address A full address. Pass null to remove/clear the address type specified
      * @param string $type The address type: Current, Prior, or Mailing
      * @return void
      * @throws \Exception If address type is an invalid enumeration
@@ -365,7 +365,7 @@ class ConsumerCreditRequestData
 
     /**
      * Set credit card to be charged if user wants to (or needs to) pay at the time of ordering.
-     * To clear this valuee, simply call the method, but pass in nothing.
+     * To clear this value, simply call the method, but pass in nothing.
      *
      * @param CreditCardBlock|null $info Full credit card details.
      * @return void
@@ -485,7 +485,8 @@ class ConsumerCreditRequestData
     }
 
     /**
-     * Get the ID assigned to the borrower
+     * Get the ID assigned to the borrower. This ID is used to reference the borrower when setting or
+     * getting values.
      *
      * @return string
      */
@@ -495,7 +496,8 @@ class ConsumerCreditRequestData
     }
 
     /**
-     * Get the ID assigned to the coborrower
+     * Get the ID assigned to the coborrower. This ID is used to reference the coborrower when setting or
+     * getting values.
      *
      * @return string
      */

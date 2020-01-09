@@ -23,6 +23,36 @@ class ConsumerCreditResponseParser extends ResponseParser
         'COMPLETED' => 'COMPLETED',
         'ERROR' => 'ERROR'
     ];
+    /**
+     * @var array This table holds the mapping between RatingCode and RatingText
+     *
+     * - X or -: The creditor did not report any data for that month. Note that the response
+     * XML may sometimes offer it's own corresponding rating text. In such cases, you may see a value
+     * of "TooNew" for this code. Practically speaking, they can both be treated the same: nothing available.
+     * - C: The account is current and paid on time.
+     * - 1: The account is 30-59 days late on payment.
+     * - 2: The account is 60-89 days late on payment.
+     * - 3: The account is 90-119 days late on payment.
+     * - 4 or 5 or 6: The account is 120 or more days late on payment.
+     * - 7: The account has been included in a bankruptcy filing.
+     * - 8: The secured debt is overdue and the creditor has moved to repossess collateral to settle.
+     * - 9: The unsecured debt is overdue and the creditor has written it off. This may--or may already have
+     * been--sold to a collection agency.
+     */
+    public const RATING_TEXT = [
+        'X' => 'NoDataAvailable',
+        '-' => 'NoDataAvailable',
+        'C' => 'AsAgreed',
+        '1' => 'Late30Days',
+        '2' => 'Late60Days',
+        '3' => 'Late90Days',
+        '4' => 'Late120Days',
+        '5' => 'Late120Days',
+        '6' => 'Late120Days',
+        '7' => 'BankruptcyOrWageEarnerPlan',
+        '8' => 'ForeclosureOrRepossession',
+        '9' => 'CollectionOrChargeOff'
+    ];
     /** @var bool Holds flag that tells us if the response file contains a primary borrower */
     private $borr_present = false;
     /** @var string The label associated with the borrower, parsed from the XML response */
@@ -118,6 +148,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      * - BureauName: The name of the credit bureau (i.e. Equifax, Experian, TransUnion)
      * - Result: The bureau's response. Check MISMO 3.4 schema for 'CreditFileResultStatusBase' type for
      * list of enumerations. Anything other than 'FileReturned' value can be considered an unsuccessful order.
+     * For example, if the borrower's file is frozen, that wuold return something other than FileReturned.
      * - ErrorDescription: If the result wasn't a success, the corresponding error message returned by the
      * bureau will be loaded here.
      *
@@ -188,7 +219,7 @@ class ConsumerCreditResponseParser extends ResponseParser
     /**
      * Returns a multidimensional array containing the credit scores reported by the bureaus and all related
      * information. An array of the below associative arrays will be returned. Descriptions in parenthesis
-     *
+     * ```
      * [BureauName] => TransUnion (The credit bureau that reported the score)
      * [DateGenerated] => 2019-12-29 (The date the credit bureau generated the score, this will coincide with
      * the date of the credit pull)
@@ -204,6 +235,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      *  Code => 041
      *  Text => Too many lates
      * [ScoreValue] => 667 (The person's credit score)
+     * ```
      *
      * @param string $id The ID of the applicant you want to obtain this info for
      * @return array
@@ -412,8 +444,9 @@ class ConsumerCreditResponseParser extends ResponseParser
      * This returns an array of associative arrays. Each associative array contains all details of a single
      * CREDIT_LIABILITY node. Below is an example of the associative array. Most of these are
      * self-explanatory. Refer to the MISMO 3.4 XSD for details on any of these or speak with your technical
-     * rep.
-     *
+     * rep. The default value for each array key is an empty string. This is overwritten if the provider
+     * returns a value for that data point.
+     * ```
      * FullName
      * CreditLiabilityAccountIdentifier
      * CreditLiabilityAccountType
@@ -453,6 +486,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      * CreditorAddressState
      * CreditorAddressZip
      * ContactPointTelephoneValue
+     * ```
      *
      * @param string $id On joint credit files, if only liabilities associated with the borrower or
      * coborrower should be returned, indicate their ID here to apply the filter. Otherwise, all liabilities
@@ -510,21 +544,7 @@ class ConsumerCreditResponseParser extends ResponseParser
     }
 
     /**
-     * This method converts rating codes to their text equivalent. The rating code is also referred
-     * to as MOP (Manner of Payment) and payment rating. The description of each rating text is below
-     *
-     * X or -: The creditor did not report any data for that month. Note that the response
-     * XML may sometimes offer it's own corresponding rating text. In such cases, you may see a value
-     * of "TooNew" for this code. Practically speaking, they can both be treated the same: nothing available.
-     * C: The account is current and paid on time.
-     * 1: The account is 30-59 days late on payment.
-     * 2: The account is 60-89 days late on payment.
-     * 3: The account is 90-119 days late on payment.
-     * 4 or 5 or 6: The account is 120 or more days late on payment.
-     * 7: The account has been included in a bankruptcy filing.
-     * 8: The secured debt is overdue and the creditor has moved to repossess collateral to settle.
-     * 9: The unsecured debt is overdue and the creditor has written it off. This may--or may already have
-     * been--sold to a collection agency.
+     * This method converts rating codes to their text equivalent by searching the corresponding array
      *
      * @param string $code The rating code. Should be a single character.
      * @param boolean $suppress_invalid False by default, but if set to true, submitting an invalid rating
@@ -535,23 +555,9 @@ class ConsumerCreditResponseParser extends ResponseParser
     public static function getRatingText(string $code, bool $suppress_invalid = false): string
     {
         $code = strtoupper(trim($code));
-        $rating_table = [
-            'X' => 'NoDataAvailable',
-            '-' => 'NoDataAvailable',
-            'C' => 'AsAgreed',
-            '1' => 'Late30Days',
-            '2' => 'Late60Days',
-            '3' => 'Late90Days',
-            '4' => 'Late120Days',
-            '5' => 'Late120Days',
-            '6' => 'Late120Days',
-            '7' => 'BankruptcyOrWageEarnerPlan',
-            '8' => 'ForeclosureOrRepossession',
-            '9' => 'CollectionOrChargeOff',
-        ];
-
-        //Loop through rating table to find a match and return it
-        foreach ($rating_table as $key => $value) {
+        
+        //Loop through rating text array to find a match and return it
+        foreach (self::RATING_TEXT as $key => $value) {
             if ($code === (string)$key) {
                 return $value;
             }

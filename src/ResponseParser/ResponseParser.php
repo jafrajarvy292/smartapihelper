@@ -23,8 +23,10 @@ abstract class ResponseParser
     /** @var string Another XML schema namespace we probably won't use, but is declared in response */
     public const P5 = 'http://www.w3.org/2001/XMLSchema-instance';
     /** @var array This array holds all the statuses that SmartAPI can communicate in its response. Only
-     * a single status will be communicated in each response. Some products only use a subset of this list and
-     * each child class' STATUS constant will reflect only what is applicable to that product.
+     * a single status will be communicated in each response. Each product may only use a subset of this
+     * list and each child class' STATUS array will reflect only what is used. The descriptions provided
+     * here are general and may not apply to every child class. If a child class' description for a particular
+     * status differs, then it will be pointed out.
      * - REQUEST_ERROR: This means an error was encountered with the request itself. More often than not,
      * this results from an authentication error (e.g. invalid user credentials).
      * - SERVICE_ERROR: This means an error was encountered related to the product you are ordering. For
@@ -133,7 +135,8 @@ abstract class ResponseParser
     }
 
     /**
-     * Returns the status description indicated in the response XML file
+     * Returns the status description indicated in the response XML file. Often populated if the status was
+     * an error.
      *
      * @return string
      */

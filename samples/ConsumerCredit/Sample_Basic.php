@@ -116,5 +116,6 @@ while ($timeout > 0 && $keep_polling === true) {
 
 //If polling timed out, stop polling and display relevant message to user.
 if ($keep_polling === true) {
-    echo 'Polling timed out...';
+    echo 'The order too longer than expected to complete. Please contact service provider to notify them ' .
+    'of the issue.';
 }
