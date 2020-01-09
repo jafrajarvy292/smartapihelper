@@ -14,7 +14,7 @@ The SmartAPI Integration Guide, which is included in the integration kit, can be
 - PHP 7.1.0 or higher
 - Extension: cURL
 - Extension: OpenSSL
-- Extension: DOM
+- Extension: XML
 
 # Installation Instructions
 ## With Composer
