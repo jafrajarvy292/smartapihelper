@@ -6,7 +6,7 @@
  */
 
  //Include the autoloader
-require '..\\jafrajarvy292\\smartapihelper\\autoload.php';
+require '../jafrajarvy292/smartapihelper/autoload.php';
 
 //Include classes that are used for this request
 use jafrajarvy292\SmartAPIHelper\Ancillary\AddressBlock;
@@ -98,7 +98,7 @@ $manager->setMCLSurrogatedLogin('login2');
 //Generate the XML payload from the ConsumerCreditRequestData object and load it into our HTTPHandler object
 $manager->loadXMLString($request->getXMLString());
 //Enable logging. This will show us what was sent to the server and what we got back. Helpful for debugging.
-$manager->enableLogging(__DIR__ . '\\temp_logs\\');
+$manager->enableLogging(__DIR__ . '/temp_logs/');
 //Submit the cURL request
 $manager->submitCURLRequest();
 
@@ -174,6 +174,6 @@ while ($timeout > 0 && $keep_polling === true) {
 
 //If polling timed out, stop polling and display relevant message to user.
 if ($keep_polling === true) {
-    echo 'The order too longer than expected to complete. Please contact service provider to notify them ' .
+    echo 'The order took longer than expected to complete. Please contact service provider to notify them ' .
     'of the issue.';
 }

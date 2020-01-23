@@ -269,8 +269,8 @@ abstract class ResponseParser
     }
 
     /**
-     * This extracts the status and status description from the XML response. Intended to be ran by the
-     * child class when the XML doc is initially loaded to the object
+     * This extracts the status and status description from the XML response. Intended to be ran immediately
+     * after the XML document is loaded
      *
      * @return void
      * @throws \Exception If a status could not be determined after checking various parts of the response
@@ -341,8 +341,8 @@ abstract class ResponseParser
     }
 
     /**
-     * This will extract the VendorOrderIdentifier from the response XML, if present. Intended to be ran by
-     * the child class when the XML is initially loaded to the object
+     * This will extract the VendorOrderIdentifier from the response XML, if present. Intended to be ran
+     * immediately after the XML document is loaded
      *
      * @return void
      */

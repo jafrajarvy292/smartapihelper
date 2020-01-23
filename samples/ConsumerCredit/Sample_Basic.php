@@ -6,7 +6,7 @@
  */
 
  //Include the autoloader
-require '..\\jafrajarvy292\\smartapihelper\\autoload.php';
+require '../jafrajarvy292/smartapihelper/autoload.php';
 
 //Include classes that are used for this request
 use jafrajarvy292\SmartAPIHelper\Ancillary\AddressBlock;
@@ -116,6 +116,6 @@ while ($timeout > 0 && $keep_polling === true) {
 
 //If polling timed out, stop polling and display relevant message to user.
 if ($keep_polling === true) {
-    echo 'The order too longer than expected to complete. Please contact service provider to notify them ' .
+    echo 'The order took longer than expected to complete. Please contact service provider to notify them ' .
     'of the issue.';
 }

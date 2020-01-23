@@ -32,7 +32,7 @@ class ConsumerCreditRequestData
     public const REQUEST_TYPES = ['Submit', 'StatusQuery', 'Upgrade', 'Refresh', 'PermUnmerge'];
     
     /** Borrower's info */
-    /** @var string Value used to reference the borrower when setting object properties */
+    /** @var string Value used to reference the borrower when setting object properties. */
     private $borr_id = 'b';
     /** @var PersonNameBlock|null Full name of the borrower */
     private $borr_name;
@@ -294,12 +294,12 @@ class ConsumerCreditRequestData
     }
 
     /**
-     * Set email address
+     * Set email address. Very light validation is done to ensure only a single, valid email is provided.
      *
      * @param string $person_id ID used to reference which person this is for
      * @param string $email A single email address associated with the person.
      * @return void
-     * @throws \Exception If email address is invalid or more than one email was provided
+     * @throws \Exception If email address is invalid or more than one email was provided.
      */
     public function setEmail(string $person_id, string $email): void
     {
@@ -308,11 +308,18 @@ class ConsumerCreditRequestData
         $email = trim($email);
         if ($email === null || $email === '') {
             $email = '';
-        //We apply a very basic regex check to prevent invalid email or more than one email.
-        } elseif (preg_match('/(@.*){2}|[; ,]/', $email) === 1) {
+        /* If email is missing the @ symbol, then throw exception */
+        } elseif (preg_match('/@/', $email) === 0 || preg_match('/@/', $email) === false) {
+            throw new \Exception('Email is invalid.');
+        /* If email is missing a period, then throw exception */
+        } elseif (preg_match('/\./', $email) === 0 || preg_match('/\./', $email) === false) {
+            throw new \Exception('Email is invalid.');
+        /* If email contains two or more @ symbols; a semicolon; space or comma, then user is probably
+        trying to pass in more than one email address. Throw exception */
+        } elseif (preg_match('/(@.*){2,}|[; ,]/', $email) === 1) {
             throw new \Exception('Email is invalid or more than one email was provided.');
         }
-        //If we make it this far, then email is valid, save it
+        //If we make it this far, then email is probably valid, save it
         if ($person_id === $this->borr_id) {
             $this->borr_email = $email;
         } elseif ($person_id === $this->coborr_id) {

@@ -16,11 +16,11 @@ class CreditCardBlock
     /** @var AddressBlock Billing address associated with card */
     private $cardholder_address;
     /** @var string Credit card number */
-    private $card_number;
+    private $card_number = '';
     /** @var string Expiration month  */
-    private $card_exp_month;
+    private $card_exp_month = '';
     /** @var string Expiration year */
-    private $card_exp_year;
+    private $card_exp_year = '';
     /** @var string Card verification value / security code. Optional, but recommended */
     private $card_cvv = '';
 
@@ -149,21 +149,29 @@ class CreditCardBlock
     /**
      * Return the cardholder name block
      *
-     * @return PersonNameBlock
+     * @return PersonNameBlock|null
      */
-    public function getCardholderName(): PersonNameBlock
+    public function getCardholderName(): ?PersonNameBlock
     {
-        return $this->cardholder_name;
+        if ($this->cardholder_name === null) {
+            return null;
+        } else {
+            return $this->cardholder_name;
+        }
     }
 
     /**
      * Return the cardholder billing address
      *
-     * @return AddressBlock
+     * @return AddressBlock|null
      */
-    public function getCardholderAddress(): AddressBlock
+    public function getCardholderAddress(): ?AddressBlock
     {
-        return $this->cardholder_address;
+        if ($this->cardholder_address === null) {
+            return null;
+        } else {
+            return $this->cardholder_address;
+        }
     }
 
     /**
@@ -210,8 +218,10 @@ class CreditCardBlock
      * Generates a credit card payment block for XML insertion
      *
      * This function will generate a full credit card payment data block and return it as a DOM node,
-     * which can be appended to an element using appendChild(). A sample of the usage and returning card
-     * block is below.
+     * which can be appended to an element using appendChild(). While we don't make a lot of the fields here
+     * mandatory, the only field that is typically optional is the CVV. The rest of the credit card data
+     * fields should be provided to ensure a successful transaction by the payment gateway.
+     * A sample of the usage and returning card block is below.
      * ```
      * $element->appendChild($credit_card->getXML($base));
      *
@@ -248,26 +258,43 @@ class CreditCardBlock
         if ($namespace === null) {
             $namespace = $base->lookupNamespaceUri(null);
         }
+        //If cardholder address is provided, generate XML for it
         $parent = $base->createElementNS($namespace, 'SERVICE_PAYMENT');
-        $parent->appendChild($this->getCardholderAddress()->getXML($base, $namespace));
-        $parent->appendChild($this->getCardholderName()->getXML($base, $namespace));
+        if ($this->cardholder_address !== null) {
+            $parent->appendChild($this->getCardholderAddress()->getXML($base, $namespace));
+        }
+        //If cardholder name is provided, generate XML for it
+        if ($this->cardholder_name !== null) {
+            $parent->appendChild($this->getCardholderName()->getXML($base, $namespace));
+        }
         $payment_detail = $parent->appendChild($base->createElementNS($namespace, 'SERVICE_PAYMENT_DETAIL'));
-        $payment_detail->appendChild($base->createElementNS(
-            $namespace,
-            'ServicePaymentAccountIdentifier',
-            $this->getCardNumber()
-        ));
-        $payment_detail->appendChild($base->createElementNS(
-            $namespace,
-            'ServicePaymentCreditAccountExpirationDate',
-            $this->getExpYear() . '-' . $this->getExpMonth()
-        ));
+        //If credit card number is provided, generate XML for it
+        if ($this->card_number !== null && $this->card_number !== '') {
+            $payment_detail->appendChild($base->createElementNS(
+                $namespace,
+                'ServicePaymentAccountIdentifier',
+                $this->card_number
+            ));
+        }
+        //If expiration month and year are both provided, generate XML for this
+        if (
+            $this->card_exp_month !== null &&
+            $this->card_exp_month !== '' &&
+            $this->card_exp_year !== null &&
+            $this->card_exp_year !== ''
+        ) {
+            $payment_detail->appendChild($base->createElementNS(
+                $namespace,
+                'ServicePaymentCreditAccountExpirationDate',
+                $this->card_exp_month . '-' . $this->card_exp_year
+            ));
+        }
         //If CVV was provided, insert it
         if ($this->getCVV() !== null && $this->getCVV() !== '') {
             $payment_detail->appendChild($base->createElementNS(
                 $namespace,
                 'ServicePaymentSecondaryCreditAccountIdentifier',
-                $this->getCVV()
+                $this->card_cvv
             ));
         }
         return $parent;
@@ -282,6 +309,18 @@ class CreditCardBlock
      */
     public static function validateCardNumber(string $number): bool
     {
+        //If number passed is empty string or null, return false
+        if ($number === null || $number === '') {
+            return false;
+        /* Check to see if the card number contains anything other than digits or if the regex attempt
+        fails. If so, return false */
+        } elseif (
+            preg_match('/[^0-9]/', $number) === 1 ||
+            preg_match('/[^0-9]/', $number) === false
+        ) {
+            return false;
+        }
+        //If number is all digits, run Luhn algorithm check
         //Convert input string to array, one array slot for each digit
         $array = str_split($number);
         //Cast each array entry from string to int

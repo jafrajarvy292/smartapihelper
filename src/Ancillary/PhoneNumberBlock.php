@@ -19,13 +19,14 @@ class PhoneNumberBlock
     private $extension = '';
     /** @var string The phone number type (e.g. Home, Work, etc) */
     private $type = 'Home';
-    /** @var string Description of the number if type if Other */
+    /** @var string Description of the number if type is Other */
     private $description = '';
     /** @var string The regular expression for what is considered a valid 10 digit phone number. Will accept
      * the following or similar common formats:
      * - (888) (444-5555)
      * - 4445556666
      * - 222 444 5555
+     * - 222-444-5555
      */
     public const NUMBER_REGEX = '/^[^\d]?\d{3}[^\d]{0,2}\d{3}[^\d]?\d{4}$/';
 

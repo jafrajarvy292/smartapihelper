@@ -46,9 +46,9 @@ class ConsumerCreditResponseParser extends ResponseParser
         '1' => 'Late30Days',
         '2' => 'Late60Days',
         '3' => 'Late90Days',
-        '4' => 'Late120Days',
-        '5' => 'Late120Days',
-        '6' => 'Late120Days',
+        '4' => 'LateOver120Days',
+        '5' => 'LateOver120Days',
+        '6' => 'LateOver120Days',
         '7' => 'BankruptcyOrWageEarnerPlan',
         '8' => 'ForeclosureOrRepossession',
         '9' => 'CollectionOrChargeOff'

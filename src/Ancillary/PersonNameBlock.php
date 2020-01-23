@@ -12,13 +12,13 @@ namespace jafrajarvy292\SmartAPIHelper\Ancillary;
 class PersonNameBlock
 {
     /** @var string $first First name */
-    private $first;
+    private $first = '';
     /** @var string Last name */
-    private $last;
+    private $last = '';
     /** @var string Middle name */
-    private $middle;
+    private $middle = '';
     /** @var string Suffix from pre-defined enumeration */
-    private $suffix;
+    private $suffix = '';
     /** @var array List of valid suffixes */
     public const VALID_SUFFIXES = ['SR', 'JR', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
 
@@ -184,6 +184,12 @@ class PersonNameBlock
      */
     public static function validateName(string $name): bool
     {
+        $name = trim($name);
+        /* If name is empty string, return false. It can be debated that an empty string doesn't necesitate
+        an invalid name, but it's best to just not attempt to validate an empty string to begin with */
+        if ($name === '') {
+            return false;
+        }
         //Regex returns 1 if it finds any unacceptable characters
         $is_valid = preg_match('/[^a-zA-z \-\'\.]/', $name);
         //If regex returns 1 or false, it means unacceptable character was found or search failed.
