@@ -1,4 +1,4 @@
-[![License MIT](https://img.shields.io/github/license/jafrajarvy292/smartapihelper)](https://opensource.org/licenses/MIT)
+[![License MIT](https://img.shields.io/github/license/jafrajarvy292/smartapihelper?maxAge=1)](https://opensource.org/licenses/MIT)
 
 [GitHub Page](https://github.com/jafrajarvy292/smartapihelper)  
 [Documentation Page](https://sample.asuscomm.com/smartapihelper_documentation/html)
