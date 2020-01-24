@@ -128,7 +128,9 @@ class ResponseFormats
     }
 
     /**
-     * Returns a count of the number of formats set to true
+     * Returns a count of the number of formats set to true. Ideally, we want to check to ensure at least
+     * one format is set to true before we go generating the XML container for this, otherwise we get a
+     * container that has no child elements. This won't cause any errors, though it's sloppy.
      *
      * @return int
      */

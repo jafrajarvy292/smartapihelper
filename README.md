@@ -23,7 +23,7 @@ To install using composer:
     composer require jafrajarvy292/smartapihelper
 
 If composer's autoload file is already included in your project, then this library will automatically be loaded.
-## Manual Installation
+## Manual via SPL Autoloader
 Download the latest release and and extract to its own folder. Afterwards, require the autoloader file.
 
 For example, if you saved this to a folder named `smartapihelper`, then your require statement should look something like the following:
