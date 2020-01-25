@@ -256,7 +256,7 @@ class CreditCardBlockTest extends TestCase
         $expiration = $number->nextSibling;
         $cvv = $expiration->nextSibling;
         $this->assertEquals('4111111111111111', $number->textContent);
-        $this->assertEquals('12-2030', $expiration->textContent);
+        $this->assertEquals('2030-12', $expiration->textContent);
         $this->assertEquals('123', $cvv->textContent);
     }
 

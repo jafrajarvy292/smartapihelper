@@ -7,8 +7,8 @@
 namespace jafrajarvy292\SmartAPIHelper\ResponseParser;
 
 /**
- * This class is the base for all XML parser classes. It assists in setting up initial variables and
- * namespaces that are common to all SmartAPI responses
+ * This class handles the parsing of Consumer Credit response data. Native methods will allow users to quickly
+ * grab the most commonly-used data points.
  */
 class ConsumerCreditResponseParser extends ResponseParser
 {

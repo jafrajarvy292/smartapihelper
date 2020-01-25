@@ -286,7 +286,7 @@ class CreditCardBlock
             $payment_detail->appendChild($base->createElementNS(
                 $namespace,
                 'ServicePaymentCreditAccountExpirationDate',
-                $this->card_exp_month . '-' . $this->card_exp_year
+                $this->card_exp_year . '-' . $this->card_exp_month
             ));
         }
         //If CVV was provided, insert it

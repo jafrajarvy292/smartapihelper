@@ -674,6 +674,7 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
                 appendChild($base->createElement('PARTY'));
             $coborr->setAttribute('SequenceNumber', '2');
             $coborr->setAttributeNS($p2, 'label', 'Party2');
+            $coborr->appendChild($base->createElement('INDIVIDUAL'));
 
             //If phone or email is present, create CONTACT_POINTS node to insert them
             if (
@@ -681,8 +682,7 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
                 $data->getEmail('c') !== null &&
                 $data->getEmail('c') !== ''
             ) {
-                $contact_points = $coborr->appendChild($base->createElement('INDIVIDUAL'))->
-                    appendChild($base->createElement('CONTACT_POINTS'));
+                $contact_points = $coborr->appendChild($base->createElement('CONTACT_POINTS'));
                 //If phone is present, insert it
                 if ($data->getPhone('c') !== null) {
                     $contact_points->appendChild($data->getPhone('c')->getXML($base));

@@ -1820,6 +1820,894 @@ class ConsumerCreditRequestGeneratorTest extends TestCase
         $this->assertEquals(0, $node->length);
     }
 
+    public function testOutputXMLForStatusQueryXMLVersion()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setVendorOrderID('834323');
+        $data->setRequestType('StatusQuery');
+        $object = new ConsumerCreditRequestGenerator($data, '1.324');
+        $string = $object->outputXMLString();
+        $this->assertRegExp('/version="1.324"/', $string);
+    }
+
+    public function testOutputXMLForStatusQueryXMLEncoding()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('834323');
+        $object = new ConsumerCreditRequestGenerator($data, '1.0', 'WINDOWS-1252');
+        $string = $object->outputXMLString();
+        $this->assertRegExp('/encoding="WINDOWS-1252"/', $string);
+    }
+
+    public function testOutputXMLForStatusQueryDataVersion()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('834323');
+        $data->setDataVersion('98678');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '/P1:MESSAGE/P1:ABOUT_VERSIONS/P1:ABOUT_VERSION/P1:DataVersionIdentifier'
+        )->item(0);
+        $this->assertEquals('98678', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerParty()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setAddress('b', new AddressBlock('123 Main St', 'Garden Grove', 'CA', '92843'));
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerName()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]/P1:INDIVIDUAL/P1:NAME/P1:FirstName'
+        )->item(0);
+        $this->assertEquals('David', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerNoName()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]/P1:TAXPAYER_IDENTIFIERS/P1:TAXPAYER_IDENTIFIER/' .
+            'P1:TaxpayerIdentifierValue'
+        )->item(0);
+        $this->assertEquals('000000001', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerNoSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerParty()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryNoCoborrower()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]'
+        );
+        $this->assertEquals(0, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerName()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]/P1:INDIVIDUAL/P1:NAME'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerNoName()
+    {
+        /* No coborrower name simply means no coborrower. The presence of the name is what tell us whether
+        a coborrower exists */
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]'
+        );
+        $this->assertEquals(0, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]/P1:TAXPAYER_IDENTIFIERS/P1:TAXPAYER_IDENTIFIER/' .
+            'P1:TaxpayerIdentifierValue'
+        )->item(0);
+        $this->assertEquals('000000002', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerNoSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForStatusQueryBorrowerRelationship()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:RELATIONSHIP[@P2:arcrole="urn:fdc:Meridianlink.com:2017:mortgage/' .
+            'PARTY_IsVerifiedBy_SERVICE" and @P2:from="Party1" and @P2:to="Service1"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryCoborrowerRelationship()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:RELATIONSHIP[@P2:arcrole="urn:fdc:Meridianlink.com:2017:mortgage/' .
+            'PARTY_IsVerifiedBy_SERVICE" and @P2:from="Party2" and @P2:to="Service1"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryNoCoborrowerRelationship()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:RELATIONSHIP[@P2:arcrole="urn:fdc:Meridianlink.com:2017:mortgage/' .
+            'PARTY_IsVerifiedBy_SERVICE" and @P2:from="Party2" and @P2:to="Service1"]'
+        );
+        $this->assertEquals(0, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryServiceContainer()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxTrueExperianTrueTransUnionTrue()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(true);
+        $data->setExperianOptions(true);
+        $data->setTransUnionOptions(true);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxTrueExperianTrueTransUnionFalse()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(true);
+        $data->setExperianOptions(true);
+        $data->setTransUnionOptions(false);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxTrueExperianFalseTransUnionFalse()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(true);
+        $data->setExperianOptions(false);
+        $data->setTransUnionOptions(false);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxTrueExperianFalseTransUnionTrue()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(true);
+        $data->setExperianOptions(false);
+        $data->setTransUnionOptions(true);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxFalseExperianTrueTransUnionTrue()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(false);
+        $data->setExperianOptions(true);
+        $data->setTransUnionOptions(true);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxFalseExperianTrueTransUnionFalse()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(false);
+        $data->setExperianOptions(true);
+        $data->setTransUnionOptions(false);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxFalseExperianFalseTransUnionFalse()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(false);
+        $data->setExperianOptions(false);
+        $data->setTransUnionOptions(false);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryEquifaxFalseExperianFalseTransUnionTrue()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setEquifaxOptions(false);
+        $data->setExperianOptions(false);
+        $data->setTransUnionOptions(true);
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:CREDIT/P1:CREDIT_REQUEST/P1:CREDIT_REQUEST_DATAS/' .
+            'P1:CREDIT_REQUEST_DATA/P1:CREDIT_REPOSITORY_INCLUDED'
+        )->item(0);
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedEquifaxIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'false',
+            $node->getElementsByTagName('CreditRepositoryIncludedExperianIndicator')->item(0)->textContent
+        );
+        $this->assertEquals(
+            'true',
+            $node->getElementsByTagName('CreditRepositoryIncludedTransUnionIndicator')->item(0)->textContent
+        );
+    }
+
+    public function testOutputXMLForStatusQueryCreditCard()
+    {
+        $data = new ConsumerCreditRequestData();
+        $card = new CreditCardBlock();
+        $card->setAddress(new AddressBlock('123 Main St', 'Garden Grove', 'CA', '92843'));
+        $card->setName(new PersonNameBlock('David', 'Testcase'));
+        $card->setCardNumber('4111111111111111');
+        $card->setExpMonth('01');
+        $card->setExpYear('2050');
+        $data->setCreditCard($card);
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:SERVICE_PAYMENTS/P1:SERVICE_PAYMENT'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryProductDescription()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:SERVICE_PRODUCT/P1:SERVICE_PRODUCT_REQUEST/' .
+            'P1:SERVICE_PRODUCT_DETAIL/P1:ServiceProductDescription'
+        )->item(0);
+        $this->assertEquals('CreditOrder', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryResponseFormats()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setResponseFormats(new ResponseFormats(true, true, true));
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:SERVICE_PRODUCT/P1:SERVICE_PRODUCT_REQUEST/' .
+            'P1:SERVICE_PRODUCT_DETAIL/P1:EXTENSION/P1:OTHER/P3:SERVICE_PREFERRED_RESPONSE_FORMATS'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryNoResponseFormats()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $data->setResponseFormats(new ResponseFormats(false, false, false));
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:SERVICE_PRODUCT/P1:SERVICE_PRODUCT_REQUEST/' .
+            'P1:SERVICE_PRODUCT_DETAIL/P1:EXTENSION/P1:OTHER/P3:SERVICE_PREFERRED_RESPONSE_FORMATS'
+        );
+        $this->assertEquals(0, $node->length);
+    }
+
+    public function testOutputXMLForStatusQueryVendorOrderID()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $data->setVendorOrderID('4892349');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:SERVICE[@P2:label="Service1"]/P1:SERVICE_PRODUCT_FULFILLMENT/' .
+            'P1:SERVICE_PRODUCT_FULFILLMENT_DETAIL/P1:VendorOrderIdentifier'
+        )->item(0);
+        $this->assertEquals('4892349', $node->textContent);
+    }
+
+    public function testOutputXMLForStatusQueryNoVendorOrderID()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('StatusQuery');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForUpgradeXMLVersion()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data, '2.44');
+        $string = $object->outputXMLString();
+        $this->assertRegExp('/version="2.44"/', $string);
+    }
+
+    public function testOutputXMLForUpgradeEncoding()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data, '1.0', 'WINDOWS-1252');
+        $string = $object->outputXMLString();
+        $this->assertRegExp('/encoding="WINDOWS-1252"/', $string);
+    }
+
+    public function testOutputXMLForUpgradeDataVersion()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $data->setDataVersion('5893894573');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '/P1:MESSAGE/P1:ABOUT_VERSIONS/P1:ABOUT_VERSION/P1:DataVersionIdentifier'
+        )->item(0);
+        $this->assertEquals('5893894573', $node->textContent);
+    }
+
+    public function testOutputXMLForUpgradeBorrowerParty()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForUpgradeNoBorrower()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForUpgradeBorrowerName()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]/P1:INDIVIDUAL/P1:NAME'
+        );
+        $this->assertEquals(1, $node->length);
+    }
+
+    public function testOutputXMLForUpgradeBorrowerSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party1"]/P1:TAXPAYER_IDENTIFIERS/P1:TAXPAYER_IDENTIFIER/' .
+            'P1:TaxpayerIdentifierValue'
+        )->item(0);
+        $this->assertEquals('000000001', $node->textContent);
+    }
+
+    public function testOutputXMLForUpgradeBorrowerNoSSN()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $this->expectException(\Exception::class);
+        $object->outputXMLString();
+    }
+
+    public function testOutputXMLForUpgradeCoborrowerParty()
+    {
+        $data = new ConsumerCreditRequestData();
+        $data->setName('b', new PersonNameBlock('David', 'Testcase'));
+        $data->setSSN('b', '000000001');
+        $data->setName('c', new PersonNameBlock('Jackie', 'Tester'));
+        $data->setSSN('c', '000000002');
+        $data->setRequestType('Upgrade');
+        $data->setVendorOrderID('9876546787');
+        $object = new ConsumerCreditRequestGenerator($data);
+        $base = new \DOMDocument();
+        $base->loadXML($object->outputXMLString());
+        $xpath = new \DOMXPath($base);
+        $xpath->registerNamespace('P1', 'http://www.mismo.org/residential/2009/schemas');
+        $xpath->registerNamespace('P2', 'http://www.w3.org/1999/xlink');
+        $xpath->registerNamespace('P3', 'inetapi/MISMO3_4_MCL_Extension.xsd');
+        $node = $xpath->evaluate(
+            '//P1:PARTY[@P2:label="Party2"]'
+        );
+        $this->assertEquals(1, $node->length);
+    }
 
 
     
