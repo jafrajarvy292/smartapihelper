@@ -682,7 +682,8 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
                 $data->getEmail('c') !== null &&
                 $data->getEmail('c') !== ''
             ) {
-                $contact_points = $coborr->appendChild($base->createElement('CONTACT_POINTS'));
+                $contact_points = $coborr->getElementsByTagName('INDIVIDUAL')->item(0)->
+                    appendChild($base->createElement('CONTACT_POINTS'));
                 //If phone is present, insert it
                 if ($data->getPhone('c') !== null) {
                     $contact_points->appendChild($data->getPhone('c')->getXML($base));
