@@ -58,11 +58,16 @@ abstract class ResponseParser
         'COMPLETED' => 'COMPLETED',
         'ERROR' => 'ERROR'
     ];
-    /** @var \DOMDocument This will hold the XML document we received from the server */
+    /** @var \DOMDocument This will hold the XML document we received from the server. It is protected
+     * because child classes will need to access it.
+     */
     protected $base;
-    /** @var \DOMElement This will hold the root element */
+    /** @var \DOMElement This will hold the root element.  It is protected because child classes will need to
+     * access it. */
     protected $root;
-    /** @var \DOMXPath The xpath that will help us jump around the XML doc as we parse it */
+    /** @var \DOMXPath The xpath that will help us jump around the XML doc as we parse it. It is protected
+     * because child classes will need to access it.
+     */
     protected $xpath;
     /** @var string This variable holds the status we pulled from the XML response to provide to the user */
     private $response_status = '';
@@ -79,6 +84,7 @@ abstract class ResponseParser
      * @param string $xml_response The XML, as a string, that we received from the server
      * @param string $xml_ver XML version
      * @param string $encoding XML encoding language
+     * @return void
      * @throws \Exception If the XML response is empty
      * @throws \Exception If the XML response doesn't contain MESSAGE for its root element
      */
@@ -86,7 +92,7 @@ abstract class ResponseParser
         string $xml_response,
         string $xml_ver = '1.0',
         string $encoding = 'utf-8'
-    ) {
+    ): void {
         //Instantiate the DOMDocument
         if (trim($xml_response === '')) {
             throw new \Exception('XML response string is empty. Nothing to parse.');
@@ -269,14 +275,15 @@ abstract class ResponseParser
     }
 
     /**
-     * This extracts the status and status description from the XML response. Intended to be ran immediately
-     * after the XML document is loaded
+     * This extracts the status and status description from the XML response. Intended to be called from
+     * the loadXMLResponse() method as a way of "automatically" getting this data for the user as soon
+     * as the response XML is loaded to the object.
      *
      * @return void
      * @throws \Exception If a status could not be determined after checking various parts of the response
      * @throws \Exception If a StatusCode was returned, but isn't one of the expected enumerations
      */
-    protected function parseStatus(): void
+    private function parseStatus(): void
     {
         //Check to see if a request error was encountered. The presence of the referenced node would tell us
         $request_error = $this->xpath->evaluate(
@@ -341,12 +348,13 @@ abstract class ResponseParser
     }
 
     /**
-     * This will extract the VendorOrderIdentifier from the response XML, if present. Intended to be ran
-     * immediately after the XML document is loaded
+     * This will extract the VendorOrderIdentifier from the response XML, if present. Intended to be called
+     * from the loadXMLResponse() method as a way of "automatically" getting this data for the user as soon
+     * as the response XML is loaded to the object.
      *
      * @return void
      */
-    protected function parseVendorOrderID(): void
+    private function parseVendorOrderID(): void
     {
         $id = $this->xpath->evaluate(
             '/P1:MESSAGE/P1:DEAL_SETS/P1:DEAL_SET/P1:DEALS/P1:DEAL/P1:SERVICES/' .

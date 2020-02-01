@@ -275,9 +275,6 @@ class HTTPHandler
             directory in alphabetical sort. We then append a random hex value to allow the user to quickly
             find the file */
             $time = (string)(microtime(true) * 10000);
-            /* Take the last 10 digits of the timestamp, since that's sufficient for keeping the files
-            in a sorted order */
-            $time = substr($time, -10);
             $log_id = $time . '_' . sprintf('%06x', mt_rand(0, 0xffffff));
 
             //Create the request and response log files and their resource pointers

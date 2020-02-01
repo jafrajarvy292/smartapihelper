@@ -4,11 +4,13 @@ This document provides instructions on maintaining this library and its document
 These instructions have been written from the perspective of a Windows machine, but backslashes have been replaced with forward slashes to minimize edits needed to get these working on a Linux machine, since forward slashes work on Windows machines, as well.
 
 ## Unit Testing
-Unit testing is ran with [PHPUnit](https://phpunit.de) and should be ran on all relevant files under the `tests` directory. The `bootstrap.php` file should be included, as it ensures class autoloading and instantiates needed variables and objects. An example of the command line to be ran is below. This will vary based on operating system and how you have PHPUnit installed:
+Unit testing is ran with [PHPUnit](https://phpunit.de) and should be ran on all relevant files under the `tests` directory. An example of the command line to be ran is below. This will vary based on operating system and how you have PHPUnit installed:
 
-    C:\projects\smartapihelper\tests> php C:/php/phpunit.phar --bootstrap bootstrap.php .
+    C:\projects\smartapihelper\tests> php C:/php/phpunit.phar --bootstrap bootstrap.php --process-isolation .
 
 Notice in this example the working folder is the `tests` folder, so using the period to indicate the target means we're running PHPUnit on the folder itself, along with all sub-directories.
+
+The `bootstrap.php` file should be included, as it ensures class autoloading and instantiates needed variables and objects. The bootstrap file also contains a directive to increase the PHP application's memory limit. Either run unit testing with sufficient memory or use the `--process-isolation` argument, as shown here.
 
 ## Documentation Generation
 [Doxygen](http://doxygen.nl) is used to create the documentation for this library. Though Doxygen does have a wizard that provides a GUI, using the command line to handle this is highly recommended.

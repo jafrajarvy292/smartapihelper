@@ -3,7 +3,6 @@
 namespace jafrajarvy292\SmartAPIHelper\HTTPHandler;
 
 use PHPUnit\Framework\TestCase;
-use stdClass;
 
 class HTTPHandlerTest extends TestCase
 {

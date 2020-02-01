@@ -8,7 +8,11 @@ namespace jafrajarvy292\SmartAPIHelper\ResponseParser;
 
 /**
  * This class handles the parsing of Consumer Credit response data. Native methods will allow users to quickly
- * grab the most commonly-used data points.
+ * grab the most commonly-used data points. Note that many of these methods require the presence of parsable
+ * XML data. This means if your request did not include parsable XML as a preferred response format, these
+ * methods will return exceptions, empty arrays, etc. Additionally, before attempting to extract data for
+ * a specific applicant (i.e. borrower, coborrower), you should check to see if the person is present
+ * in the data via the provided method for doing this.
  */
 class ConsumerCreditResponseParser extends ResponseParser
 {
@@ -86,11 +90,11 @@ class ConsumerCreditResponseParser extends ResponseParser
         string $xml_response,
         string $xml_ver = '1.0',
         string $encoding = 'utf-8'
-    ) {
+    ): void {
         //Run the parent class's constructor to populate all the items that are not product-specific
         parent::loadXMLResponse($xml_response, $xml_ver, $encoding);
 
-        //Determine if the primary borrower is present in the response file. This will almost always be a yes.
+        //Determine if the primary borrower is present in the response file.
         $borr_node = $this->xpath->evaluate(
             '/P1:MESSAGE/P1:DEAL_SETS/P1:DEAL_SET/P1:DEALS/P1:DEAL/P1:SERVICES/P1:SERVICE/P1:CREDIT/' .
             'P1:CREDIT_RESPONSE/P1:PARTIES/P1:PARTY/P1:ROLES/P1:ROLE[P1:BORROWER/P1:BORROWER_DETAIL/' .
@@ -125,9 +129,10 @@ class ConsumerCreditResponseParser extends ResponseParser
     }
 
     /**
-     * Check if a person is present in the response data. Pass in ID of the borrower or coborrower and this
-     * will return a true or a false. This should be used prior to attempting run any methods to get that
-     * person's data.
+     * Check if a person is present in the parsable XML data. Pass in ID of the borrower or coborrower and
+     * this will return a true or a false. This should be used prior to attempting run any methods to get that
+     * person's data. Note if parsable XML was not requested as a preferred response format, then this will
+     * always return false.
      *
      * @param string $id The ID of the person being checked.
      * @return boolean
@@ -154,8 +159,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      *
      * @param string $id The ID of the person you wan to grab the data for.
      * @return array Returns an array of associative arrays
-     * @throws \Exception If borrower data is requested, but is not present in the response data. It's nearly
-     * impossible for this to happen, as a file will always have at least a primary borrower.
+     * @throws \Exception If borrower data is requested, but is not present in the response data.
      * @throws \Exception If coborrower data is requested, is not present in the response data
      */
     public function getBureauResponses(string $id): array
@@ -420,7 +424,6 @@ class ConsumerCreditResponseParser extends ResponseParser
      * @param string $id The ID of the person for which the labels are sought.
      * @return array
      * @throws \Exception If borrower data is being requested, but they are not present in the response file.
-     * This is nearly impossible, since files will always have at least a primary borrower
      * @throws \Exception If coborrower data is being requested, but they are not present in the response.
      */
     public function getCreditFileLabels(string $id): array
@@ -492,20 +495,38 @@ class ConsumerCreditResponseParser extends ResponseParser
      * coborrower should be returned, indicate their ID here to apply the filter. Otherwise, all liabilities
      * will be returned
      * @return array An array of associative arrays
+     * @throws \Exception If borrower data is being requested, but they are not present in the response file.
+     * @throws \Exception If coborrower data is being requested, but they are not present in the response.
      */
     public function getLiabilities(string $id = ''): array
     {
+        $person_label = '';
         $return_array = [];
         /* If person ID was provided, then we will grab their label to return only liabilities associated
         with them */
         if ($id !== '') {
+            //Ensure a valid person ID is passed
             $this->checkPersonID($id);
-            $person_label = '';
+            //If borrower ID is passed, check that they're present in our response data
             if ($id === 'b') {
-                $person_label = $this->borr_label;
+                if ($this->borr_present === false) {
+                    throw new \Exception(
+                        'Borrower not present in data. Unable to filter their liabilities.'
+                    );
+                } else {
+                    $person_label = $this->borr_label;
+                }
+            //If coborrower ID is passed, check that they're present in our response data
             } elseif ($id === 'c') {
-                $person_label = $this->coborr_label;
+                if ($this->coborr_present === false) {
+                    throw new \Exception(
+                        'Coborrower not present in data. Unable to filter their liabilities.'
+                    );
+                } else {
+                    $person_label = $this->coborr_label;
+                }
             }
+            //If we get this far, person ID is valid and present, obtain liability data
             $liability_labels = [];
             /* Grab all RELATIONSHIP nodes where CREDIT_LIABILITY_IsAssociatedWith_ROLE shows association with
             the person label */
@@ -517,7 +538,7 @@ class ConsumerCreditResponseParser extends ResponseParser
             /* Loop through all the RELATIONSHIP we identified earlier and extract the CREDIT_LIABILITY
             label and store them to array */
             for ($i = 0; $i < $relationship_nodes->length; $i++) {
-                $liability_labels[] = $relationship_nodes->item(0)->textContent;
+                $liability_labels[] = $relationship_nodes->item($i)->textContent;
             }
             /* Find the CREDIT_LIABILITY node associated with each label in the array and run it
             through our parser */
@@ -838,7 +859,6 @@ class ConsumerCreditResponseParser extends ResponseParser
      * @param string $id The ID of the person we want to load the labels for
      * @return void
      * @throws \Exception If borrower data is being requested, but they are not present in the response file.
-     * This is nearly impossible, since files will always have at least a primary borrower
      * @throws \Exception If coborrower data is being requested, but they are not present in the response.
      */
     private function loadCreditFileLabels(string $id): void
