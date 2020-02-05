@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Helper library for MeridianLink's SmartAPI interface",
     "keywords": ["meridianlink", "mcl", "mortgagecreditlink", "smartapi", "credit report", "credit reports", "mismo"],
-    "homepage": "https://github.com/jafrajarvy292",
+    "homepage": "https://github.com/jafrajarvy292/smartapihelper",
     "license": "MIT",
     "authors": [
         {
