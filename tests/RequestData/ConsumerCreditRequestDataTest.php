@@ -745,7 +745,7 @@ class ConsumerCreditRequestDataTest extends TestCase
         $object->setName('b', new PersonNameBlock('David', 'Testcase'));
         $object->setSSN('b', '000000001');
         $object->setAddress('b', new AddressBlock('123 Main St', 'Garden Grove', 'CA', '92843'));
-        $this->assertIsString('string', $object->getXMLString());
+        $this->assertIsString($object->getXMLString());
     }
 
     public function testGetXMLStringMissingRequestType()
