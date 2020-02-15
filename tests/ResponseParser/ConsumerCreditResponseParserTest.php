@@ -29,7 +29,7 @@ class ConsumerCreditResponseParserTest extends TestCase
         '15_' => ''
     ];
 
-    public function setUp()
+    public function setUp(): void
     {
         libxml_use_internal_errors(true);
         $this->cc_file['01_'] = file_get_contents(glob(__DIR__ . '/ConsumerCredit_Responses/01_*.xml')[0]);
