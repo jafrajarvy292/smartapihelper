@@ -39,6 +39,9 @@ class ResponseFormats
     /**
      * In the event that SmartAPI is enhanced to support more formats than the pre-defined ones,
      * you can add them here. Example below:
+     * ```
+     * $object->setCustomFormat('Json', true);
+     * ```
      *
      * @param string $format The format being requested. Note this field is typically case-sensitive.
      * @param boolean $flag Set to true or false

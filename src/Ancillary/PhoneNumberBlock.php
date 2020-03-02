@@ -23,7 +23,7 @@ class PhoneNumberBlock
     private $description = '';
     /** @var string The regular expression for what is considered a valid 10 digit phone number. Will accept
      * the following or similar common formats:
-     * - (888) (444-5555)
+     * - (888) 444-5555
      * - 4445556666
      * - 222 444 5555
      * - 222-444-5555
