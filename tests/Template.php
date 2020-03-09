@@ -6,4 +6,5 @@ use PHPUnit\Framework\TestCase;
 
 class ConsumerCreditResponseParserTest extends TestCase
 {
+    //
 }
