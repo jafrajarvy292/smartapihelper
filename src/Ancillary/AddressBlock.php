@@ -2,7 +2,7 @@
 
 /**
  * This file is part of MeridianLink's SmartAPI Helper package.
- * 
+ *
  * For the full copyright and license information, please view the LICENSE file that was distributed with
  * this source code.
  */
@@ -112,7 +112,7 @@ class AddressBlock
      * ```
      * $object = new AddressBlock('123 Main St.','Santa Ana','CA','92626','US');
      * ```
-     * 
+     *
      * @param string $street Full street address (e.g. 123 N Main St #389);
      * @param string $city
      * @param string $state 2-character abbreviation

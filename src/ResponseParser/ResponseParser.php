@@ -2,7 +2,7 @@
 
 /**
  * This file is part of MeridianLink's SmartAPI Helper package.
- * 
+ *
  * For the full copyright and license information, please view the LICENSE file that was distributed with
  * this source code.
  */
@@ -176,7 +176,7 @@ abstract class ResponseParser
      * - Namespaces: This is an associative array of all the namespaces that have been registered
      * with the XML document and xpath object. The keys are the namespace prefix, the values are the
      * namespace URIs
-     * 
+     *
      * Example below:
      * ```
      * ['DOMDocument'] => \DOMDocument

@@ -2,7 +2,7 @@
 
 /**
  * This file is part of MeridianLink's SmartAPI Helper package.
- * 
+ *
  * For the full copyright and license information, please view the LICENSE file that was distributed with
  * this source code.
  */
@@ -159,7 +159,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      * For example, if the borrower's file is frozen, that wuold return something other than FileReturned.
      * - ErrorDescription: If the result wasn't a success, the corresponding error message returned by the
      * bureau will be loaded here.
-     * 
+     *
      * Example below:
      * ```
      * ['BureauName'] => 'TransUnion'
@@ -242,7 +242,7 @@ class ConsumerCreditResponseParser extends ResponseParser
      * - PercentileRank: The person's percentile rank
      * - ScoreFactors: An array of score factors--code and corresponding text
      * - ScoreValue: The person's credit score
-     * 
+     *
      * Example below:
      * ```
      * ['BureauName'] => 'TransUnion'
