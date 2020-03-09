@@ -109,6 +109,7 @@ class AddressBlock
      * ```
      * $object = new AddressBlock('123 Main St.','Santa Ana','CA','92626','US');
      * ```
+     * 
      * @param string $street Full street address (e.g. 123 N Main St #389);
      * @param string $city
      * @param string $state 2-character abbreviation

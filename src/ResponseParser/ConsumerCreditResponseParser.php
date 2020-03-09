@@ -156,6 +156,13 @@ class ConsumerCreditResponseParser extends ResponseParser
      * For example, if the borrower's file is frozen, that wuold return something other than FileReturned.
      * - ErrorDescription: If the result wasn't a success, the corresponding error message returned by the
      * bureau will be loaded here.
+     * 
+     * Example below:
+     * ```
+     * ['BureauName'] => 'TransUnion'
+     * ['Result'] => 'NoFileReturnedError'
+     * ['ErrorDescription'] => 'FILE FROZEN BY CONSUMER'
+     * ```
      *
      * @param string $id The ID of the person you wan to grab the data for.
      * @return array Returns an array of associative arrays
@@ -223,22 +230,32 @@ class ConsumerCreditResponseParser extends ResponseParser
     /**
      * Returns a multidimensional array containing the credit scores reported by the bureaus and all related
      * information. An array of the below associative arrays will be returned. Descriptions in parenthesis
+     * - BureauName: The credit bureau that reported the score (i.e. Equifax, TransUnion, Experian)
+     * - DateGenerated: The date the credit bureau generated the score, this will coincide with
+     * the date of the credit pull
+     * - MaximumValue: The ceiling for this score model
+     * - MinimumValue: The floor for this score model
+     * - ModelName: The score model name
+     * - PercentileRank: The person's percentile rank
+     * - ScoreFactors: An array of score factors--code and corresponding text
+     * - ScoreValue: The person's credit score
+     * 
+     * Example below:
      * ```
-     * [BureauName] => TransUnion (The credit bureau that reported the score)
-     * [DateGenerated] => 2019-12-29 (The date the credit bureau generated the score, this will coincide with
-     * the date of the credit pull)
-     * [MaximumValue] => 843 (The max range for the score model)
-     * [MinimumValue] => 336 (The minimum range for the score model)
-     * [ModelName] => FICORiskScoreClassic98 (The score model name)
-     * [PercentileRank] => 32 (The person's percentile rank)
-     * [ScoreFactors] => (An array of score factors--code and corresponding text)
-     * [0]
-     *  Code => 040
-     *  Text => Too many inquiries
-     * [1]
-     *  Code => 041
-     *  Text => Too many lates
-     * [ScoreValue] => 667 (The person's credit score)
+     * ['BureauName'] => 'TransUnion'
+     * ['DateGenerated'] => '2019-12-29'
+     * ['MaximumValue'] => '843'
+     * ['MinimumValue'] => '336'
+     * ['ModelName'] => 'FICORiskScoreClassic98'
+     * ['PercentileRank'] => '32'
+     * ['ScoreFactors'] =>
+     *  [0]
+     *   ['Code'] => '040'
+     *   ['Text'] => 'Too many inquiries'
+     *  [1]
+     *   ['Code'] => '041'
+     *   ['Text'] => 'Too many lates'
+     * ['ScoreValue'] => '667'
      * ```
      *
      * @param string $id The ID of the applicant you want to obtain this info for

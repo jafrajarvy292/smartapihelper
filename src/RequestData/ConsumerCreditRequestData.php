@@ -742,9 +742,12 @@ class ConsumerCreditRequestData
     }
 
     /**
-     * Generates the XML request string that will be submitted to the service API
+     * Generates the XML request string that will be submitted to the service API. This function doesn't do
+     * anything other than initiate a method from the ConsumerCreditRequestGenerator class.
      *
      * @return string
+     * @throws \Exception Exceptions can be thrown, but it will vary upon the RequestType that is used and
+     * what required data is missing. See the ConsumerCreditRequestGenerator class for specifics.
      */
     public function getXMLString(): string
     {

@@ -40,11 +40,6 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generate the full request XML file and return it as a string
      *
      * @return string The full XML request document as a string
-     * @throws \Exception If borrower name is missing
-     * @throws \Exception If borrower's current address is empty
-     * @throws \Exception If borrower SSN is empty
-     * @throws \Exception If coborrower name is populated, but current address is empty
-     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
      */
     public function outputXMLString(): string
     {
@@ -78,6 +73,11 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * Generates an XML for a new order request
      *
      * @return string
+     * @throws \Exception If borrower name is missing
+     * @throws \Exception If borrower's current address is empty
+     * @throws \Exception If borrower SSN is empty
+     * @throws \Exception If coborrower name is populated, but current address is empty
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
      */
     private function outputXMLforSubmit(): string
     {
@@ -434,7 +434,7 @@ class ConsumerCreditRequestGenerator extends RequestGenerator
      * @return string
      * @throws \Exception If borrower name is missing
      * @throws \Exception If borrower SSN is empty
-     * @throws \Exception If coborrower name is populated, but corresponding SSN is emtpy
+     * @throws \Exception If coborrower name is populated, but corresponding SSN is empty
      * @throws \Exception If VendorOrderIdentifier is empty
      */
     private function outputXMLforStatusQuery(): string

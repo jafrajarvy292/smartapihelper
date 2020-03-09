@@ -167,12 +167,21 @@ abstract class ResponseParser
      * that the SmartAPI Helper library doesn't specifically provide a method for retrieving. The below
      * outlines the associative array that is returned:
      *
-     * - 'DOMDocument' => \DOMDocument (This is a clone of the XML document received from the server)
-     * - 'DOMXPath' => \DOMXPath (This is the xpath object associated with the DOMDocument clone. This would be
-     * used to navigate through the document.)
-     * - 'Namespaces' => [] (This is an associative array of all the namespaces that have been registered
+     * - DOMDocument: This is a clone of the XML document received from the server
+     * - DOMXPath: This is the xpath object associated with the DOMDocument clone. This would be used to
+     * navigate through the document.
+     * - Namespaces: This is an associative array of all the namespaces that have been registered
      * with the XML document and xpath object. The keys are the namespace prefix, the values are the
-     * namespace URIs)
+     * namespace URIs
+     * 
+     * Example below:
+     * ```
+     * ['DOMDocument'] => \DOMDocument
+     * ['DOMXPath'] => \DOMXPath
+     * ['Namespaces'] =>
+     *  ['P1'] => 'http://www.mismo.org/residential/2009/schemas'
+     *  ['P2'] => 'http://www.w3.org/1999/xlink'
+     * ```
      *
      * @return array
      */
