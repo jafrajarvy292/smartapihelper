@@ -1,5 +1,5 @@
 [GitHub Page](https://github.com/jafrajarvy292/smartapihelper)  
-[Documentation Page](https://sample.asuscomm.com/smartapihelper_documentation/html)
+[Documentation Page](https://sampling.ddns.net/project_portfolio/smartapihelper_documentation/html)
 
 # SmartAPI Helper
 This is a PHP library for [MeridianLink's](http://www.meridianlink.com) SmartAPI interface.
